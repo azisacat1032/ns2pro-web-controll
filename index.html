@@ -81,6 +81,19 @@
 </section>
 </div>
 </main>
+<template id="presetCardTemplate">
+<section class="card preset-card" aria-labelledby="presetTitle">
+  <div class="card-heading"><h2 id="presetTitle">自定义预设</h2><span class="eyebrow">PRESETS</span></div>
+  <label for="presetList">我的预设</label><select id="presetList" aria-label="我的预设"></select>
+  <label for="presetName">预设名称</label><input id="presetName" type="text" maxlength="40" placeholder="例如：动作游戏" autocomplete="off">
+  <div class="map-actions"><button id="presetCreate" class="primary">保存为新预设</button><button id="presetOverwrite">覆盖所选预设</button></div>
+  <div class="map-actions"><button id="presetApply" class="primary">应用预设</button><button id="presetPersist">应用并保存到设备</button></div>
+  <div class="map-actions"><button id="presetRename" class="quiet">重命名</button><button id="presetDelete" class="quiet">删除</button><button id="presetUndo" class="quiet" hidden>撤销删除</button></div>
+  <p id="presetSummary" class="note"></p><p id="presetState" role="status" aria-live="polite"></p>
+  <p class="note">包含全部震动强度、所有按键和背键映射、左右死区、摇杆模式及扳机开关。校准沿用当前手柄。</p>
+  <p class="note">预设保存在当前浏览器。保存时读取设备已生效参数，未应用的映射草稿不包含在内。扳机开关重启后仍按固件默认状态。</p>
+</section>
+</template>
 <dialog id="firmwareDialog" aria-labelledby="firmwareTitle">
   <div class="flash-heading"><div><span class="eyebrow">FIRMWARE UPDATE</span><h2 id="firmwareTitle">固件更新</h2></div><button id="firmwareClose" type="button" class="quiet">返回控制台</button></div>
   <p class="flash-intro">连接接收器的 USB 串口，选择固件后更新。配对、校准与个人设置会保留。</p>
@@ -133,6 +146,7 @@ function busy(value) {
   if (typeof runtimeBusy === 'function') runtimeBusy(value);
   if (typeof deadzoneBusy === 'function') deadzoneBusy(value);
   if (typeof calibrationBusy === 'function') calibrationBusy(value);
+  if (typeof presetBusy === 'function') presetBusy(value);
 }
 function showGain(values) {
   confirmedProfile = values.slice();
@@ -377,6 +391,7 @@ navigator.hid?.addEventListener('disconnect', event => {
 <script src="controller-view.js"></script>
 <script src="stick-calibration.js"></script>
 <script src="runtime.js"></script>
+<script src="presets.js"></script>
 <script src="vendor/js-md5-0.8.3/md5.js"></script>
 <script type="module" src="firmware-update.js"></script>
 </body>
