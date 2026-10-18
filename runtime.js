@@ -67,7 +67,7 @@ async function runtimeConnected(device, capabilities) {
   runtimeDevice = device; runtimePanel.hidden = false;
   runtimeTimer = setInterval(() => {
     const active = document.activeElement;
-    if (configBusy || document.hidden || active?.matches('input[type="range"], select')) return;
+    if (configBusy || document.hidden || active?.matches('input[type="range"], select, #presetName')) return;
     runtimeOperation(false);
   }, 2000);
 }
