@@ -4,7 +4,7 @@ const presetKey = 'ns2pro.presets.v1';
 const presetList = document.querySelector('#presetList'), presetName = document.querySelector('#presetName');
 const presetState = document.querySelector('#presetState'), presetSummary = document.querySelector('#presetSummary');
 const presetControls = Object.fromEntries(['Create','Overwrite','Apply','Persist','Rename','Delete','Undo'].map(k => [k, document.querySelector('#preset' + k)]));
-let presetItems = [], presetDeleted, presetStorageError = '', presetStoredRaw = null;
+let presetItems = [], presetDeleted, presetStorageError = '', presetStoredRaw = null, presetLastApplied;
 const presetEqual = (a,b) => JSON.stringify(a) === JSON.stringify(b);
 const presetIntegerArray = (a,n,max) => Array.isArray(a) && a.length === n && a.every(v => Number.isInteger(v) && v >= 0 && v <= max);
 function presetValidateData(p) {
@@ -15,25 +15,30 @@ function presetValidateData(p) {
 function presetLoad() {
   const raw = localStorage.getItem(presetKey);
   presetStoredRaw = raw;
-  if (raw === null) return [];
+  if (raw === null) { presetLastApplied = undefined; return []; }
   const file = JSON.parse(raw);
   if (file?.version !== 1 || !Array.isArray(file.items) || file.items.length > 100) throw new Error('预设存储格式无效');
   const ids = new Set(), names = new Set();
-  return file.items.map(p => {
+  const items = file.items.map(p => {
     if (!p || typeof p.id !== 'string' || !p.id || ids.has(p.id) || typeof p.name !== 'string' ||
         !p.name.trim() || p.name.length > 40 || names.has(p.name)) throw new Error('预设名称或编号无效');
     ids.add(p.id); names.add(p.name);
     return {id:p.id, name:p.name, data:presetValidateData(p.data)};
   });
+  if (file.lastApplied != null && typeof file.lastApplied !== 'string') throw new Error('默认预设编号无效');
+  presetLastApplied = items.some(p=>p.id===file.lastApplied) ? file.lastApplied : undefined;
+  return items;
 }
-function presetCommit(items, selection) {
+function presetCommit(items, selection, lastApplied = presetLastApplied) {
   // Persist first: a quota/privacy failure must not pretend the preset was saved.
   if (localStorage.getItem(presetKey) !== presetStoredRaw) {
     presetItems = presetLoad(); presetRender();
     throw new Error('另一个页面修改了预设，已刷新，请重试');
   }
-  const raw = JSON.stringify({version:1, items});
+  lastApplied = items.some(p=>p.id===lastApplied) ? lastApplied : undefined;
+  const raw = JSON.stringify({version:1, items, lastApplied:lastApplied || null});
   localStorage.setItem(presetKey, raw); presetStoredRaw = raw;
+  presetLastApplied = lastApplied;
   presetItems = items; presetRender(selection);
 }
 const presetSelected = () => presetItems.find(p => p.id === presetList.value);
@@ -147,11 +152,13 @@ function presetCapture(overwrite) {
 }
 function presetApplySelected(persist) {
   const selected = presetSelected(); if (!selected) return;
+  return presetOperation(device => presetApplyEntry(device, selected, persist));
+}
+async function presetApplyEntry(device, selected, persist) {
   const target = presetValidateData(selected.data);
-  return presetOperation(async device => {
     const before = await presetRead(device);
     presetState.textContent = '正在应用并回读全部参数…';
-    try { await presetWrite(device,target); }
+    try { if (!presetEqual(before,target)) await presetWrite(device,target); }
     catch(error) {
       try { await presetWrite(device,before); }
       catch(rollback) {
@@ -159,12 +166,26 @@ function presetApplySelected(persist) {
         throw new Error(`${error.message}；恢复未确认，设备可能仅应用了部分参数，请重新连接读取`); }
       throw new Error(`${error.message}；已恢复应用前参数`);
     }
+    let rememberWarning = '';
+    try {
+      if (!presetItems.some(p=>p.id===selected.id && presetEqual(p.data,target))) throw new Error('预设已被其他页面修改');
+      presetCommit(presetItems, selected.id, selected.id);
+    } catch(error) { rememberWarning = `；参数已生效，但无法记住默认预设：${error.message}`; }
     if (persist) {
       try { await presetSaveDevice(device,target); }
       catch(error) { throw new Error(`预设已即时生效，但断电保存未完整确认：${error.message}。请重试“应用并保存到设备”`); }
     }
-    presetState.textContent = `“${selected.name}”已应用，全部参数回读一致。${persist?'震动、映射与死区已保存到设备；扳机开关重启按固件默认。':'尚未写入设备的断电配置。'}`;
-  });
+    presetState.textContent = `“${selected.name}”已应用，全部参数回读一致。${persist?'震动、映射与死区已保存到设备；扳机开关重启按固件默认。':'尚未写入设备的断电配置。'}${rememberWarning}`;
+}
+async function presetRestoreConnected(device) {
+  const last = presetItems.find(p=>p.id===presetLastApplied);
+  if (!last || !presetReady() || selectedDevice !== device || !device.opened || presetStorageError) return;
+  presetRender(last.id);
+  if (calibrationActive()) { presetState.textContent = `已选中上次应用的“${last.name}”；校准进行中，暂未自动应用。`; return; }
+  try {
+    await presetApplyEntry(device,last,false);
+    presetState.textContent = `已恢复上次应用的预设。${presetState.textContent}`;
+  } catch(error) { presetState.textContent = `上次预设自动应用未完成：${error.message}。可手动重试。`; }
 }
 presetList.addEventListener('change',()=>presetRender());
 presetControls.Create.addEventListener('click',()=>presetCapture(false));
@@ -192,4 +213,5 @@ window.addEventListener('storage',event=>{
   catch(error) { presetStorageError = error.message; presetBusy(configBusy); presetState.textContent = `无法读取预设：${error.message}，原存储未覆盖。`; }
 });
 try { presetItems = presetLoad(); } catch(error) { presetStorageError = error.message; presetState.textContent = `无法读取预设：${error.message}，原存储未覆盖。`; }
-presetRender();
+presetRender(presetLastApplied);
+if (presetLastApplied && !presetStorageError) presetState.textContent = '已选中上次应用的预设，连接接收器后自动恢复。';

@@ -90,6 +90,7 @@
   <div class="map-actions"><button id="presetApply" class="primary">应用预设</button><button id="presetPersist">应用并保存到设备</button></div>
   <div class="map-actions"><button id="presetRename" class="quiet">重命名</button><button id="presetDelete" class="quiet">删除</button><button id="presetUndo" class="quiet" hidden>撤销删除</button></div>
   <p id="presetSummary" class="note"></p><p id="presetState" role="status" aria-live="polite"></p>
+  <p class="note">刷新或重新打开后，默认选中上次成功应用的预设，连接接收器后自动恢复。</p>
   <p class="note">包含全部震动强度、所有按键和背键映射、左右死区、摇杆模式及扳机开关。校准沿用当前手柄。</p>
   <p class="note">预设保存在当前浏览器。保存时读取设备已生效参数，未应用的映射草稿不包含在内。扳机开关重启后仍按固件默认状态。</p>
 </section>
@@ -276,6 +277,7 @@ button.addEventListener('click', async () => {
       line('当前固件仅支持通信测试；烧录支持总强度的新固件后可显示滑块。');
     }
     result.textContent = '连接成功'; result.dataset.connected = 'true';
+    if (typeof presetRestoreConnected === 'function') await presetRestoreConnected(device);
   } catch (error) {
     result.textContent = `连接失败：${error.message}`; result.dataset.connected = 'false';
     line(`${error.name}: ${error.message}`);
