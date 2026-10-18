@@ -248,7 +248,7 @@ button.addEventListener('click', async () => {
       showGain(await fetchGain(device));
       canSave = Boolean(info[7] & 4);
       if (canSave) showSaved(await fetchSave(device));
-      else saveState.textContent = `当前固件仅支持 RAM 调节，重启恢复 ${gainDisplay(100)}%`; 
+      else saveState.textContent = `当前固件仅支持 RAM 调节，重启恢复 ${gainDisplay(100)}%`;
       saveGain.hidden = !canSave;
       selectedDevice = device;
       settings.hidden = false;

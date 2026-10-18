@@ -1,4 +1,5 @@
 import { inspectFirmware, APP_OFFSET } from './firmware-image.mjs';
+import { resetToApplication } from './firmware-reset.mjs';
 const el = id => document.getElementById(id);
 const dialog = el('firmwareDialog'), open = el('firmwareOpen'), close = el('firmwareClose');
 const file = el('firmwareFile'), info = el('firmwareFileInfo'), connect = el('flashConnect');
@@ -18,7 +19,7 @@ async function release(reset = true) {
   const l = loader, t = transport;
   loader = undefined; transport = undefined; port = undefined;
   let failed = false;
-  if (reset && l) { try { await l.after('hard_reset'); } catch (e) { failed = true; append(`重启未确认：${e.message}`); } }
+  if (reset && l) { try { await resetToApplication(t); } catch (e) { failed = true; append(`重启未确认：${e.message}`); } }
   if (t) { try { await t.disconnect(); } catch (e) { failed = true; append(`关闭串口未确认：${e.message}`); } }
   portInfo.textContent = failed ? '请手动重启接收器，并确认其他软件没有占用串口。' : '串口已释放；返回后请重新连接接收器。';
   return !failed;
@@ -95,7 +96,7 @@ start.addEventListener('click', async () => {
     if (!verified) throw new Error('未收到固件写入校验成功结果');
     setProgress(100);
     const released = await release();
-    state.textContent = released ? '烧录及校验成功，已发送重启指令。返回控制台后重新连接。' : '烧录及校验成功，请手动重启接收器。';
+    state.textContent = released ? '烧录及校验成功，已发送启动复位信号。返回控制台后重新连接，确认接收器已启动。' : '烧录及校验成功，但启动未确认；请手动重启接收器。';
   } catch (e) {
     state.textContent = `更新未确认：${e.message}。可重新连接串口重试。`; append(state.textContent);
     await release();
