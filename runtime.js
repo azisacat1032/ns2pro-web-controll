@@ -20,6 +20,7 @@ function showCharge(known, charging) {
   chargeState.title = description;
   chargeState.setAttribute('aria-label', description);
   chargeState.dataset.charging = String(known && charging);
+  batteryIcon.dataset.charging = String(known && charging);
 }
 function unknownBattery(reason = '等待真实手柄数据。') {
   batteryCells.forEach(cell => cell.classList.remove('filled'));
@@ -51,6 +52,12 @@ function showRuntime(bytes) {
       : `沿用最近有效放电档位，档位更新约 ${Math.floor(age / 1000)} 秒前。`;
   } else unknownBattery('已连接，尚无有效的放电档位；等待现有采样流程。');
   showCharge(Boolean(bytes[5]), Boolean(bytes[6]));
+  if (bytes[5] && bytes[6]) {
+    batteryIcon.style.color = '#b88710';
+    batteryIcon.setAttribute('aria-label', '充电中');
+    batteryLevel.textContent = '充电中';
+    batteryMeta.textContent = '充电中';
+  }
   batteryIcon.title = `${batteryIcon.getAttribute('aria-label')}；${batteryMeta.textContent}`;
 }
 async function readRuntime(device) { const bytes = payloadOf(await device.receiveFeatureReport(9), 9); showRuntime(bytes); return bytes; }
