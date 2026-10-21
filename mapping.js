@@ -5,6 +5,12 @@ const mapSources = ['B（下）', 'A（右）', 'Y（左）', 'X（上）', 'L',
 const mapTargets = ['禁用', '× Cross', '○ Circle', '□ Square', '△ Triangle', 'L1', 'R1',
   'L2', 'R2', 'L3', 'R3', '方向↑', '方向→', '方向↓', '方向←', '触摸板点击',
   'PS / Home', 'Options', 'Create / Share', '麦克风静音'];
+function mapTargetLabel(target) {
+  if (typeof usbModeConfirmed === 'undefined' || usbModeConfirmed !== 1) return mapTargets[target];
+  let face = ['禁用', 'A', 'B', 'X', 'Y'];
+  if (typeof xboxLayoutConfirmed !== 'undefined' && xboxLayoutConfirmed) face = ['禁用', 'B', 'A', 'Y', 'X'];
+  return target <= 4 ? face[target] : mapTargets[target];
+}
 const mapDefaultTargets = [1,2,3,4,5,6,7,8,18,17,9,10,13,12,14,11,16,15,10,9,19];
 const mapPanel = document.querySelector('#mappingPanel');
 const mapState = document.querySelector('#mapState');
@@ -65,7 +71,7 @@ mapMirrors.forEach(control => {
 function renderMapMirrors() {
   mapMirrors.forEach(control => {
     const source = Number(control.getAttribute('data-map-source'));
-    const label = mapDraft ? `${mapSources[source]} → ${mapTargets[mapDraft[source]]}` : mapSources[source];
+    const label = mapDraft ? `${mapSources[source]} → ${mapTargetLabel(mapDraft[source])}` : mapSources[source];
     control.setAttribute('aria-pressed', String(Boolean(mapDraft) && source === mapSelected));
     control.setAttribute('aria-label', label); control.title = label;
   });
@@ -92,16 +98,19 @@ function mappingReset() {
 }
 function renderMapping() {
   if (!mapDraft) return;
+  for (const select of [mapTarget, mapLeft, mapRight]) {
+    Array.from(select.options).forEach((option, target) => { option.textContent = mapTargetLabel(target); });
+  }
   mapSourceLabel.textContent = `${mapSources[mapSelected]} →`;
   mapTarget.value = mapDraft[mapSelected];
   mapLeft.value = mapDraft[19]; mapRight.value = mapDraft[18];
   mapRows.replaceChildren();
   mapSources.forEach((label, source) => {
-    mapButtons[source].title = `${label} → ${mapTargets[mapDraft[source]]}`;
+    mapButtons[source].title = `${label} → ${mapTargetLabel(mapDraft[source])}`;
     mapButtons[source].setAttribute('aria-label', mapButtons[source].title);
     mapButtons[source].setAttribute('aria-pressed', String(source === mapSelected));
     const row = document.createElement('tr');
-    for (const text of [label, mapTargets[mapDraft[source]]]) {
+    for (const text of [label, mapTargetLabel(mapDraft[source])]) {
       const cell = document.createElement('td'); cell.textContent = text; row.append(cell);
     }
     mapRows.append(row);
