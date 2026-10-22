@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "nativeApi": 1,
-  "revision": "1a37758d75f3522332e6b2ad2c60ce125b4c7597c32f831aae2c33bda0c0c527",
+  "revision": "caf83e32cf9946e38e28e085a433673755ee53a0d29e4fa8682d11f4878a0a06",
   "files": [
     {
       "path": "assets/ns2-pro-front.jpg",
@@ -60,23 +60,23 @@
     },
     {
       "path": "firmware-update.js",
-      "bytes": 8366,
-      "sha256": "fdf13168336149ee4be9b0e26f732925af5ce0699e2478fd40d952dbf881b2aa"
+      "bytes": 8537,
+      "sha256": "6076c65c1af40ac9114871ed27516ff4605509cb14f7ed78235f13214bc25f97"
     },
     {
       "path": "firmware/NS2Pro-ESP32S3-Four-Modes.bin",
-      "bytes": 799280,
-      "sha256": "f09e66064106b57d3803134d9bcc0450488f4be3bd310445064ddae925365788"
+      "bytes": 800192,
+      "sha256": "ff72dfe60240020459ad5a1b6b1139045485df6b80ee05a47160138043ce1470"
     },
     {
       "path": "firmware/SHA256SUMS.txt",
       "bytes": 96,
-      "sha256": "65e583e012d00ebab527025cd6622c605043e08f06bfb8c712f6c85d97f9d62a"
+      "sha256": "5eab58ac485362f73b1f72cb3b7e2c0a1de2e373310686ce2d4c5c1caf70546e"
     },
     {
       "path": "firmware/catalog.json",
       "bytes": 462,
-      "sha256": "e3540667180b4230065635405eb8711a5deb356103ed33f51c97de6e49802d5e"
+      "sha256": "fe99f9329b392fc9d63e1516c873a3b9483dc989bb79bac7aaa07c5933e81c55"
     },
     {
       "path": "gyro-calibration.js",
@@ -125,8 +125,8 @@
     },
     {
       "path": "vendor/README.md",
-      "bytes": 832,
-      "sha256": "a7c280fe6d99a6182b2f3c57e9501aa1c0a4698edda3ad958bf487912b19817c"
+      "bytes": 939,
+      "sha256": "42247fb769acf22d44c0a0d9da3e278468c1634c9b1279997fe9e7ba78a13899"
     },
     {
       "path": "vendor/esptool-js-0.7.0/LICENSE",
@@ -135,8 +135,8 @@
     },
     {
       "path": "vendor/esptool-js-0.7.0/bundle.js",
-      "bytes": 313171,
-      "sha256": "00ebe6fb0b202976d3e2a3c6b9a6bd438c26a81d2af6739c95ac276a64c1a84e"
+      "bytes": 313184,
+      "sha256": "e29d61943494dd85e55c6bd9bed53e32b9ac526aae8db447feb23c0aa179ee81"
     },
     {
       "path": "vendor/js-md5-0.8.3/LICENSE.txt",

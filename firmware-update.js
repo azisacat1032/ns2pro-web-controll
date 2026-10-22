@@ -99,7 +99,7 @@ connect.addEventListener('click', async () => {
     state.textContent = firmware ? '准备就绪，点击开始烧录。' : '串口已连接，请选择应用固件。';
   } catch (e) {
     const cancelled = e.name === 'NotFoundError';
-    state.textContent = cancelled ? '已取消选择串口。' : `连接失败：${e.message}。请关闭串口监视器后重试。`;
+    state.textContent = cancelled ? '已取消选择串口。' : `连接失败：${e.message}。请检查 USB 连接、端口选择和串口占用后重试。`;
     await release();
   } finally { working = false; controls(); }
 });
@@ -127,6 +127,7 @@ start.addEventListener('click', async () => {
     setProgress(100);
     const released = await release();
     state.textContent = released ? '烧录及校验成功。请拔掉 COM/USB 串口线，给接收器断电重启，再返回控制台确认连接。' : '烧录及校验成功，但启动未确认。请拔掉 COM/USB 串口线，给接收器断电重启。';
+    window.dispatchEvent?.(new CustomEvent('firmware-flash-complete',{detail:{verified:true,version:firmware.version,sha256:firmware.sha256}}));
   } catch (e) {
     state.textContent = `更新未确认：${e.message}。可重新连接串口重试。`; append(state.textContent);
     await release();

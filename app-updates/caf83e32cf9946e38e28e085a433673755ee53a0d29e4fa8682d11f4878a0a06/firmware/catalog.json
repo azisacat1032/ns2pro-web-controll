@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "items": [
+    {
+      "id": "four-modes",
+      "name": "四模式固件",
+      "file": "NS2Pro-ESP32S3-Four-Modes.bin",
+      "version": "5.9.19-ble2500us-experiment-u1",
+      "bytes": 800192,
+      "sha256": "ff72dfe60240020459ad5a1b6b1139045485df6b80ee05a47160138043ce1470",
+      "chip": "ESP32-S3",
+      "type": "application",
+      "address": "0x10000",
+      "modes": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ]
+}
