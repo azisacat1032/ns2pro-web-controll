@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "nativeApi": 1,
-  "revision": "caf83e32cf9946e38e28e085a433673755ee53a0d29e4fa8682d11f4878a0a06",
+  "revision": "414cf031171e2774be6f5f8d0f475125ba6763dc96dbf0ffdd824c1b2f9732b9",
   "files": [
     {
       "path": "assets/ns2-pro-front.jpg",
@@ -125,13 +125,13 @@
     },
     {
       "path": "vendor/README.md",
-      "bytes": 939,
-      "sha256": "42247fb769acf22d44c0a0d9da3e278468c1634c9b1279997fe9e7ba78a13899"
+      "bytes": 927,
+      "sha256": "21bbaab9d66e7629e7efcc321ae1f0c3d9b8186da6a7dcb34b5f6e82af78ae80"
     },
     {
       "path": "vendor/esptool-js-0.7.0/LICENSE",
-      "bytes": 11566,
-      "sha256": "3fa6adb1a93fb956d5fca578c9b7cade461015042f223536b2d69cbed67d4874"
+      "bytes": 11365,
+      "sha256": "1c25f29242785d63e9adb0be7fdc137551dfbbc0756b622fcd26d9cd7de3a4f3"
     },
     {
       "path": "vendor/esptool-js-0.7.0/bundle.js",
