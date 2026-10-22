@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "nativeApi": 1,
-  "revision": "e048f402163f53db7c072f601b96deb0dc8d5f8adfb3805dd12921e86c64ff31",
+  "revision": "1a37758d75f3522332e6b2ad2c60ce125b4c7597c32f831aae2c33bda0c0c527",
   "files": [
     {
       "path": "assets/ns2-pro-front.jpg",
@@ -40,8 +40,8 @@
     },
     {
       "path": "desktop-app.css",
-      "bytes": 5334,
-      "sha256": "d93d1d4350647032f135eab75171969ee9bd20919bbfc6190521cf1a579944fe"
+      "bytes": 5568,
+      "sha256": "9063298011143de44ec437429bb00b83e0c492e9667469d382cd8d1b0365f0be"
     },
     {
       "path": "desktop-app.js",
@@ -85,8 +85,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 47387,
-      "sha256": "8300dacc32761d5930a5610732abe1b399faf8ea1976242b415ed229b130918d"
+      "bytes": 47491,
+      "sha256": "d662f87f37f3f88807a03ced06b62b6d0f35d91bd0a990b4fe08e10bb8954b7d"
     },
     {
       "path": "mapping.js",
