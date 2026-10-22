@@ -6,6 +6,7 @@
 <title>NS2 Pro · 接收器控制台</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="desktop-app.css">
+<link rel="stylesheet" href="setup/onboarding.css">
 </head>
 <body>
 <aside class="app-sidebar" aria-label="控制台导航">
@@ -17,7 +18,7 @@
     <a href="#presets" data-app-view="presets"><span aria-hidden="true">▦</span>预设管理</a>
     <a href="#automation" data-app-view="automation"><span aria-hidden="true">↯</span>连发与宏</a>
   </nav>
-  <nav class="app-nav browser-settings-nav" aria-label="应用设置"><a href="#appsettings" data-app-view="appsettings"><span aria-hidden="true">⚙</span>设置</a></nav>
+  <nav class="app-nav browser-settings-nav" aria-label="应用设置"><button id="browserSetupGuideOpen" type="button" disabled><span aria-hidden="true">?</span>使用引导</button><a href="#appsettings" data-app-view="appsettings"><span aria-hidden="true">⚙</span>设置</a></nav>
   <div class="app-sidebar-footer"><span class="app-local-dot"></span> 本地设备 · WebHID<small>NS2 Pro / ESP32-S3</small></div>
 </aside>
 <header class="topbar">
@@ -237,7 +238,7 @@ const profileText = values => typeof usbModeProfileText === 'function' ? usbMode
 let configBusy = false;
 let firmwarePanelOpen = false;
 function busy(value) {
-  value = value || firmwarePanelOpen || (typeof usbModeIsSwitching === 'function' && usbModeIsSwitching());
+  value = value || firmwarePanelOpen || Boolean(window.ns2proBrowserGuideActive) || (typeof usbModeIsSwitching === 'function' && usbModeIsSwitching());
   configBusy = value;
   document.querySelector("#firmwareOpen").disabled = value;
   button.disabled = value;
@@ -311,7 +312,8 @@ function payloadOf(view, id) {
   return new Uint8Array(view.buffer, view.byteOffset + 1, 63);
 }
 
-button.addEventListener('click', async () => {
+window.addEventListener('ns2pro-guide-finished',()=>{if(!window.__TAURI__)button.dispatchEvent(new CustomEvent('click',{detail:{fromGuide:true}}));});
+button.addEventListener('click', async event => {
   if (configBusy) return;
   busy(true);
   settings.hidden = false;
@@ -335,7 +337,9 @@ button.addEventListener('click', async () => {
   try {
     if (!window.isSecureContext) throw new Error('请通过 http://localhost 或 HTTPS 打开本页');
     if (!navigator.hid) throw new Error('当前浏览器未提供 WebHID，请在桌面 Chrome 或 Edge 中打开');
-    [device] = await navigator.hid.requestDevice({
+    if(event.detail?.fromGuide){
+      device=(await navigator.hid.getDevices()).find(d=>[0x054c,0xcafe,0x057e].includes(d.vendorId)&&d.collections.some(c=>c.usagePage===0xff00&&c.usage===(d.vendorId===0x057e?2:1)));
+    }else [device] = await navigator.hid.requestDevice({
       filters: [
         {vendorId: 0x054c, usagePage: 0xff00, usage: 0x01}, // DS5 / Edge config HID
         {vendorId: 0x057e, usagePage: 0xff00, usage: 0x02}, // Native Pro2 config HID
@@ -544,6 +548,7 @@ navigator.hid?.addEventListener('disconnect', event => {
 <script src="presets.js"></script>
 <script src="controller-presets.js"></script>
 <script src="desktop-app.js"></script>
+<script type="module" src="setup/browser-entry.js"></script>
 <script src="vendor/js-md5-0.8.3/md5.js"></script>
 <script type="module" src="firmware-update.js"></script>
 </body>

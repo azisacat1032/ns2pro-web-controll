@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "nativeApi": 1,
-  "revision": "414cf031171e2774be6f5f8d0f475125ba6763dc96dbf0ffdd824c1b2f9732b9",
+  "revision": "418c907999bdb326596ae6b59a94ea0c1532a8f4160f32299f16421cf71ce4dd",
   "files": [
     {
       "path": "assets/ns2-pro-front.jpg",
@@ -85,8 +85,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 47491,
-      "sha256": "d662f87f37f3f88807a03ced06b62b6d0f35d91bd0a990b4fe08e10bb8954b7d"
+      "bytes": 48137,
+      "sha256": "d648afc3a1f31a8bf7da1d4ce58652a00181bfe2deebae87cb9120cf96068bf7"
     },
     {
       "path": "mapping.js",
@@ -107,6 +107,36 @@
       "path": "runtime.js",
       "bytes": 9912,
       "sha256": "acedb83646be155508414a77955b40ee46a58057b0c66f120ab4f386f0719e68"
+    },
+    {
+      "path": "setup/browser-api.mjs",
+      "bytes": 3169,
+      "sha256": "b56deb2570336ab76b74dd4592cfeccc778b73961ee45125a864584d8515bac5"
+    },
+    {
+      "path": "setup/browser-entry.js",
+      "bytes": 1122,
+      "sha256": "cd38e3673e1ed0b9ad2c4115e25462cc6540718ac8563baa6cd534968d7ee003"
+    },
+    {
+      "path": "setup/onboarding-model.mjs",
+      "bytes": 3481,
+      "sha256": "845130f6b26fe88d3d367b35d9ea1fee4ba15b76f2b550317367ae73f3b530c4"
+    },
+    {
+      "path": "setup/onboarding.css",
+      "bytes": 8053,
+      "sha256": "5f531396900ade49738fb815e89ea387e0bbbafb588b22957f2e06b68708df64"
+    },
+    {
+      "path": "setup/onboarding.html",
+      "bytes": 7976,
+      "sha256": "c8f07272828eeefb153977fc4a03ce6da9bfa9862b8f469babec44f095d4a7e2"
+    },
+    {
+      "path": "setup/onboarding.js",
+      "bytes": 18664,
+      "sha256": "d3f9221b888560e011b20c67cbe4aba637571c83786f6c7a8e480b822d2360cd"
     },
     {
       "path": "stick-calibration.js",

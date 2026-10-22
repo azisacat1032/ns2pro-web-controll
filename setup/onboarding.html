@@ -1,0 +1,41 @@
+<dialog id="setupDialog" aria-labelledby="setupTitle">
+  <div class="setup-top"><span class="eyebrow">NS2 PRO · 首次设置</span><div class="setup-top-actions"><button id="setupRecoveryOpen" class="quiet" type="button">操作失误？</button><button id="setupPause" class="quiet" type="button">稍后继续</button></div></div>
+  <ol class="setup-steps" aria-label="设置进度"><li>烧录固件</li><li>连接 PC</li><li>双机配对</li><li>开始使用</li></ol>
+  <div class="setup-body">
+    <figure id="setupPortGuide" class="setup-port-guide" data-mode="flash" aria-labelledby="setupPortTitle">
+      <div class="setup-port-heading"><div><span class="eyebrow">先认接口，再插线</span><h3 id="setupPortTitle">同一接收器，两个用途</h3></div><span id="setupPortNow">现在用 COM 烧录</span></div>
+      <div class="setup-port-cards">
+        <div class="setup-port-card setup-port-com"><div class="setup-port-label"><b>COM · 烧录串口</b><span id="setupComBadge">现在插这里</span></div>
+          <svg viewBox="0 0 280 95" aria-hidden="true"><rect x="61" y="6" width="158" height="55" rx="10" fill="#242d39" stroke="currentColor"/><rect x="114" y="17" width="52" height="23" rx="4" fill="#141b24"/><text x="140" y="33" text-anchor="middle" fill="currentColor" font-size="13">UART</text><rect x="119" y="48" width="42" height="18" rx="7" fill="#0e141c" stroke="currentColor" stroke-width="2"/><rect x="128" y="55" width="24" height="4" rx="2" fill="currentColor"/><path d="M140 68 V88" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+          <p>用于选择串口、烧录固件</p><small>看丝印：UART / COM / USB-UART</small><div class="setup-port-device">电脑上显示 COM 编号，例如 COM3</div>
+        </div>
+        <div class="setup-port-card setup-port-usb"><div class="setup-port-label"><b>USB · 手柄数据口</b><span id="setupUsbBadge">烧录后使用</span></div>
+          <svg viewBox="0 0 280 95" aria-hidden="true"><rect x="61" y="6" width="158" height="55" rx="10" fill="#242d39" stroke="currentColor"/><rect x="114" y="17" width="52" height="23" rx="4" fill="#141b24"/><text x="140" y="33" text-anchor="middle" fill="currentColor" font-size="13">USB</text><rect x="119" y="48" width="42" height="18" rx="7" fill="#0e141c" stroke="currentColor" stroke-width="2"/><rect x="128" y="55" width="24" height="4" rx="2" fill="currentColor"/><path d="M140 68 V88" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+          <p>用于连接接收器、日常玩游戏</p><small>看丝印：USB / OTG / NATIVE</small><div class="setup-port-device">正常运行固件后，电脑识别为手柄</div>
+        </div>
+      </div>
+      <figcaption>两个插口外形可能一样，请按板上丝印区分。图示不代表左右位置；COM3 只是编号示例。</figcaption>
+    </figure>
+    <div class="setup-visual" aria-hidden="true"><div class="setup-board"><span>ESP32-S3</span><b>BOOT</b><i id="setupLed"></i><small>接收器</small></div><div class="setup-link">······</div><div class="setup-pad"><span>NS2 PRO</span><b>SYNC</b><small>手柄顶部</small></div></div>
+    <p id="setupStage" class="eyebrow"></p><h2 id="setupTitle"></h2><p id="setupIntro"></p>
+    <div id="setupBrowserConnection" class="setup-browser-connection" hidden><button id="setupBrowserConnect" type="button">授权连接接收器</button><p id="setupBrowserHint" class="note"></p></div>
+    <ol id="setupInstructions" class="setup-instructions"></ol>
+    <p id="setupNotice" class="setup-notice"></p>
+    <div id="setupConsoleChecks" hidden><label><input id="setupConsolePaired" type="checkbox"> 已在 NS2 上测试无线操作正常</label><label><input id="setupConsoleOff" type="checkbox"> NS2 已休眠或关机，手柄 USB 线已拔下</label></div>
+    <div id="setupPreferences" hidden><label><input id="setupAutostart" type="checkbox" role="switch"> 登录 Windows 后自动启动并连接</label><p class="note">关闭窗口后软件留在托盘；退出软件可在托盘菜单中操作。</p></div>
+    <p id="setupBrowserPreferences" class="setup-notice" hidden>开机自启与后台常驻需要软件版。引导完成记录保存在当前浏览器，清除网站数据或更换浏览器后需要重新确认。</p>
+    <div class="setup-status" role="status" aria-live="polite"><span id="setupStatusDot"></span><p id="setupStatus">等待接收器…</p></div>
+    <div class="setup-actions"><button id="setupPrimary" class="primary" type="button"></button><button id="setupSecondary" class="quiet" type="button"></button></div>
+    <details class="setup-help"><summary>操作提示与连接问题</summary><p>RESET 是接收器的复位键（部分开发板标为 EN，作用相同，按一个即可）。下文统一称 RESET。重启时只需短按一次 RESET 后松开，不会清除配对；等待约 2 秒让固件启动，不要同时按住 BOOT。</p><p>BOOT 是接收器上的另一个按键，SYNC 位于手柄顶部。配对步骤中的 BOOT 操作都要在接收器正常通电后进行；不要按住 BOOT 插电或重启。进入烧录下载模式请按烧录面板的提示操作。</p><p>红色闪烁代表操作失败，不要把随后恢复的电量灯当成成功。先检查连接再重试，不要反复合并或清除配对。引导不会自动清空已有绑定。</p></details>
+  </div>
+  <dialog id="setupRecovery" aria-labelledby="setupRecoveryTitle">
+    <div class="setup-top"><span class="eyebrow">操作帮助</span><button id="setupRecoveryClose" class="quiet" type="button" autofocus>返回引导</button></div>
+    <h2 id="setupRecoveryTitle">按错了，或者想重新配对？</h2>
+    <p class="setup-recovery-intro">先看符合你情况的一项，再操作接收器。</p>
+    <section class="setup-recovery-section"><h3>误按 BOOT + RESET，接收器连不上</h3><p>按住 BOOT 再按 RESET 会进入烧录模式，接收器功能暂时停止。</p><p>先松开所有按键，再只短按一次 RESET；如果仍未恢复，拔掉全部供电线，再接回 USB 数据口。</p></section>
+    <section class="setup-recovery-section"><h3>只想重启，不清除配对</h3><p>短按一次 RESET 后松开，等待约 2 秒让固件启动，再唤醒手柄。</p><p class="setup-recovery-note">RESET 在部分开发板上标为 EN，作用相同，按一个即可。重启时不要按住 BOOT。</p></section>
+    <section class="setup-recovery-section setup-recovery-reset"><h3>清除配对，从头设置</h3><p class="setup-recovery-warning">会清除这只手柄在接收器中保存的 PC / NS2 配对及对应绑定，需要重新配对。普通断连先尝试重启。</p><ol><li>将 NS2 休眠或关机，接收器接在电脑 USB 数据口。</li><li>只短按 RESET 后松开，等待约 2 秒让固件启动；唤醒手柄，等待它连接接收器。</li><li>在接收器启动后的 <strong>10 秒内开始长按 BOOT</strong>，持续约 <strong>8 秒</strong>，看到<strong>红色四闪</strong>后松开。</li><li>若接收器蓝色呼吸、等待手柄连接，长按手柄顶部 SYNC。清除与核验期间保持供电，白色呼吸时不要拔线。</li><li>等接收器绿色闪烁、手柄断开后，表示重置成功，再返回引导重新配对。</li></ol><p class="setup-recovery-note">如果手柄连接较慢，错过了启动后 10 秒的窗口，请重新短按 RESET 再操作。超过窗口长按 BOOT 会进入管理菜单，不会触发上述重置。红色四闪是松开提示，尚不代表清除完成；其他红色报错不能当作成功。</p></section>
+    <p class="setup-recovery-note">此页面只提供操作说明；打开、关闭或重新开始引导都不会自动清除配对。设备正在写入或核验时，请等待完成后再重新开始。</p>
+    <button id="setupRecoveryRestart" class="quiet" type="button">重新开始引导</button>
+  </dialog>
+</dialog>
