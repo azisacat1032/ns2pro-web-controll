@@ -15,8 +15,9 @@
     <a href="#controls" data-app-view="controls"><span aria-hidden="true">⌘</span>按键与摇杆</a>
     <a href="#vibration" data-app-view="vibration"><span aria-hidden="true">≈</span>震动调节</a>
     <a href="#presets" data-app-view="presets"><span aria-hidden="true">▦</span>预设管理</a>
-    <a href="#automation" data-app-view="automation"><span aria-hidden="true">↯</span>连发与宏<small class="development-badge">开发中</small></a>
+    <a href="#automation" data-app-view="automation"><span aria-hidden="true">↯</span>连发与宏</a>
   </nav>
+  <nav class="app-nav browser-settings-nav" aria-label="应用设置"><a href="#appsettings" data-app-view="appsettings"><span aria-hidden="true">⚙</span>设置</a></nav>
   <div class="app-sidebar-footer"><span class="app-local-dot"></span> 本地设备 · WebHID<small>NS2 Pro / ESP32-S3</small></div>
 </aside>
 <header class="topbar">
@@ -83,8 +84,8 @@
   <p class="note">保持静止约 2 秒；检测到移动会重新计时。完成后自动保存到接收器，校验成功后生效；断电重启自动加载。</p>
 </section>
 <section class="card automation-card" id="turboPanel" aria-labelledby="turboTitle">
-  <div class="card-heading"><h2 id="turboTitle">按键连发 <small class="development-badge">开发中</small></h2><span class="eyebrow">TURBO</span></div>
-  <p class="note">开发中，暂不支持在手柄上执行。当前仅可编辑与保存界面草稿。</p>
+  <div class="card-heading"><h2 id="turboTitle">按键连发</h2><span class="eyebrow">TURBO</span></div>
+  <p class="note">由接收器执行，关闭网页也可使用。应用后松开按键，再按下触发。</p>
   <p class="note">选择需要连发的实体按键，可同时选择多个。</p>
   <div id="turboButtons" class="automation-buttons" role="group" aria-label="连发按键"></div>
   <div class="automation-fields">
@@ -92,12 +93,12 @@
     <label for="turboRate">连发速度 <output id="turboRateValue">10 次/秒</output><input id="turboRate" type="range" min="1" max="30" value="10"></label>
   </div>
   <div class="map-actions"><button id="turboSave" type="button">保存连发草稿</button><button id="turboClear" class="quiet" type="button">清空选择</button></div>
-  <p id="turboDraftState" class="automation-state" role="status" aria-live="polite">仅界面草稿 · 尚未接入固件，保存后不会在手柄上执行。</p>
+  <div class="map-actions"><button id="automationApply" type="button" class="primary" disabled>应用全部</button><button id="automationSave" type="button" disabled>保存到设备</button><button id="automationRead" type="button" disabled>读取设备</button><button id="automationStop" type="button" class="quiet" disabled>停止全部</button></div>
+  <p id="turboDraftState" class="automation-state" role="status" aria-live="polite">未连接 · 可编辑本地草稿，连接后读取或应用。</p>
 </section>
 <section class="card automation-card" id="macroPanel" aria-labelledby="macroTitle">
-  <div class="card-heading"><h2 id="macroTitle">宏 <small class="development-badge">开发中</small></h2><span class="eyebrow">MACRO</span></div>
-  <p class="note">开发中，暂不支持在手柄上执行。当前仅可编辑与保存界面草稿。</p>
-  <p class="note">按顺序设置按键与等待时间。每个按键步骤在持续时间结束后松开。</p>
+  <div class="card-heading"><h2 id="macroTitle">宏</h2><span class="eyebrow">MACRO</span></div>
+  <p class="note">按顺序执行按键与等待，每次按键后松开 10 ms。触发键不透传到游戏；执行期间宏控制步骤涉及的按键。不同宏请使用不同触发键。</p>
   <div class="automation-fields">
     <label for="macroSlot">宏槽位<select id="macroSlot"><option value="0">宏 1</option><option value="1">宏 2</option><option value="2">宏 3</option><option value="3">宏 4</option></select></label>
     <label for="macroName">名称<input id="macroName" type="text" maxlength="32" placeholder="例如：快速连招"></label>
@@ -108,7 +109,9 @@
   <div class="map-actions"><button id="macroAddButton" type="button">＋ 按键步骤</button><button id="macroAddWait" type="button">＋ 等待</button></div>
   <p id="macroSummary" class="note"></p>
   <div class="map-actions"><button id="macroSave" type="button">保存宏草稿</button><button id="macroClear" class="quiet" type="button">清空当前宏</button></div>
-  <p id="macroDraftState" class="automation-state" role="status" aria-live="polite">仅界面草稿 · 尚未接入固件，保存后不会在手柄上执行。</p>
+  <div class="map-actions"><button id="macroDeviceApply" type="button" class="primary" disabled>应用全部</button><button id="macroDeviceSave" type="button" disabled>保存到设备</button><button id="macroDeviceRead" type="button" disabled>读取设备</button><button id="macroDeviceStop" type="button" class="quiet" disabled>停止全部</button></div>
+  <p class="note">上述设备操作同时处理连发和 4 个宏。连发按键、触发键及宏步骤均使用实体按键名称，输出跟随按键映射。</p>
+  <p id="macroDraftState" class="automation-state" role="status" aria-live="polite">未连接 · 可编辑本地草稿，连接后读取或应用。</p>
 </section>
 </div>
 <div class="right-column">
@@ -157,6 +160,11 @@
   </div>
 </section>
 </div>
+<section class="card browser-settings-card" aria-labelledby="browserSettingsTitle">
+  <div class="card-heading"><h2 id="browserSettingsTitle">设置</h2><span class="eyebrow">APPLICATION</span></div>
+  <div class="browser-setting-row"><div><label for="browserAutostart">开机自启</label><p id="browserAutostartDescription">需要软件版。网页端不支持开机自启和后台自动连接。</p></div><input id="browserAutostart" type="checkbox" role="switch" aria-describedby="browserAutostartDescription" disabled></div>
+  <p class="note">安装并运行软件版后，可在“设置 → 开机自启”中开启。登录 Windows 后软件会在托盘启动，并自动连接接收器。</p>
+</section>
 </main>
 <template id="presetCardTemplate">
 <div class="preset-column">
@@ -248,6 +256,7 @@ function busy(value) {
   if (typeof deadzoneBusy === 'function') deadzoneBusy(value);
   if (typeof calibrationBusy === 'function') calibrationBusy(value);
   if (typeof gyroBusy === 'function') gyroBusy(value);
+  if (typeof automationBusy === 'function') automationBusy(value);
   if (typeof presetBusy === 'function') presetBusy(value);
   if (typeof controllerPresetBusy === 'function') controllerPresetBusy(value);
   if (typeof usbModeBusy === 'function') usbModeBusy(value);
@@ -315,6 +324,7 @@ button.addEventListener('click', async () => {
   if (typeof deadzoneReset === 'function') deadzoneReset();
   if (typeof calibrationReset === 'function') calibrationReset();
   if (typeof gyroReset === 'function') gyroReset();
+  if (typeof automationReset === 'function') automationReset();
   saveGain.hidden = true;
   saveState.textContent = '';
   result.textContent = '等待选择设备…'; result.dataset.connected = 'false';
@@ -388,6 +398,7 @@ button.addEventListener('click', async () => {
       if (typeof deadzoneConnected === 'function') await deadzoneConnected(device, info[7], info[40]);
       if (typeof calibrationConnected === 'function') await calibrationConnected(device, info[7]);
       if (typeof gyroConnected === 'function') await gyroConnected(device, info[42]);
+      if (typeof automationConnected === 'function') await automationConnected(device, info[42]);
       if (typeof runtimeConnected === 'function') await runtimeConnected(device, info[7], info[40]);
     } else {
       line('当前固件仅支持通信测试；烧录支持总强度的新固件后可显示滑块。');
@@ -507,6 +518,7 @@ navigator.hid?.addEventListener('disconnect', event => {
   if (typeof deadzoneReset === 'function') deadzoneReset();
   if (typeof calibrationReset === 'function') calibrationReset();
   if (typeof gyroReset === 'function') gyroReset();
+  if (typeof automationReset === 'function') automationReset();
     selectedDevice = undefined;
     busy(false);
     ranges.forEach((range, i) => { labels[i].textContent = '—'; });
@@ -518,6 +530,7 @@ navigator.hid?.addEventListener('disconnect', event => {
 </script>
 <script src="mapping.js"></script>
 <script src="automation.js"></script>
+<script src="automation-device.js"></script>
 <script src="controller-view.js"></script>
 <script src="stick-calibration.js"></script>
 <script src="runtime.js"></script>

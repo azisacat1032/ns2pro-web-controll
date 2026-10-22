@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NS2 Pro · 接收器控制台</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="desktop-app.css">
+</head>
+<body>
+<aside class="app-sidebar" aria-label="控制台导航">
+  <a class="app-logo" href="#controls"><span aria-hidden="true">◖◗</span> NS2 PRO<small>接收器控制台</small></a>
+  <p class="app-nav-label">设备设置</p>
+  <nav class="app-nav" aria-label="功能分区">
+    <a href="#controls" data-app-view="controls"><span aria-hidden="true">⌘</span>按键与摇杆</a>
+    <a href="#vibration" data-app-view="vibration"><span aria-hidden="true">≈</span>震动调节</a>
+    <a href="#presets" data-app-view="presets"><span aria-hidden="true">▦</span>预设管理</a>
+    <a href="#automation" data-app-view="automation"><span aria-hidden="true">↯</span>连发与宏</a>
+  </nav>
+  <nav class="app-nav browser-settings-nav" aria-label="应用设置"><a href="#appsettings" data-app-view="appsettings"><span aria-hidden="true">⚙</span>设置</a></nav>
+  <div class="app-sidebar-footer"><span class="app-local-dot"></span> 本地设备 · WebHID<small>NS2 Pro / ESP32-S3</small></div>
+</aside>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">◖◗</span><div><h1>NS2 PRO</h1><span class="brand-caption">接收器控制台</span></div></div>
+  <div class="connection"><span id="result" role="status" aria-live="polite">未连接</span><div class="usb-mode-picker"><label for="usbMode">切换模式</label><select id="usbMode" disabled><option value="0">DS5</option><option value="2">DS5 Edge</option><option value="3">原生 Pro2</option><option value="1">Xbox</option></select><small id="usbModeState" role="status" aria-live="polite">当前：未连接</small></div><button id="firmwareOpen" type="button">固件更新</button><button id="test" class="primary" type="button">连接接收器</button></div>
+</header>
+<div class="report-rates" aria-label="蓝牙模式与实时回报率">
+  <label class="ble-interval-switch" for="bleIntervalToggle"><input id="bleIntervalToggle" type="checkbox" role="switch" aria-describedby="bleIntervalState" disabled><span>蓝牙回报率超频 <small id="bleIntervalState" role="status" aria-live="polite">连接后读取 · 实验功能</small></span></label>
+  <select id="bleIntervalRate" aria-label="蓝牙回报率档位" disabled><option value="4">200Hz</option><option value="3">266Hz</option><option value="2">400Hz</option></select>
+  <span>USB 回报率 <strong id="usbRate">—</strong></span><span>蓝牙输入 <strong id="bleRate">—</strong></span><small id="rateState">连接接收器后显示</small>
+</div>
+<main class="dashboard">
+<div class="mapping-column">
+<section class="card controller-card" id="mappingPanel" aria-labelledby="mappingTitle">
+  <div class="card-heading"><h2 id="mappingTitle">按键映射</h2><span class="eyebrow">CONTROLLER</span></div>
+  <div class="controller-studio">
+    <aside class="deadzone-controls" aria-label="摇杆死区设置">
+      <h3>死区调节</h3><p id="deadzoneMode">未连接 · 仅预览</p>
+      <label class="deadzone-enable" for="deadzoneEnabled"><input id="deadzoneEnabled" type="checkbox" role="switch" disabled> 自定义死区</label>
+      <div class="deadzone-stick"><h4>L STICK</h4><label for="leftInnerZone">内死区 <output id="leftInnerValue">10%</output></label><input id="leftInnerZone" type="range" min="0" max="50" value="10"><label for="leftOuterZone">外边界 <output id="leftOuterValue">100%</output></label><input id="leftOuterZone" type="range" min="55" max="100" value="100"></div>
+      <div class="deadzone-stick"><h4>R STICK</h4><label for="rightInnerZone">内死区 <output id="rightInnerValue">10%</output></label><input id="rightInnerZone" type="range" min="0" max="50" value="10"><label for="rightOuterZone">外边界 <output id="rightOuterValue">100%</output></label><input id="rightOuterZone" type="range" min="55" max="100" value="100"></div>
+      <div class="ring-legend"><span>●</span> 外边界<br><b>●</b> 内死区</div>
+      <div class="stick-mode"><label class="deadzone-enable" for="squareMode"><input id="squareMode" type="checkbox" role="switch" disabled> 圆角微方</label><p>关闭：纯圆模式<br>开启：斜向适度增强<br>随死区一起保存</p></div>
+    </aside>
+    <div class="view-stage">
+      <div class="controller-map photo-controller" id="controllerMap" aria-label="NS2 Pro 实物正面图，点击对应按键编辑映射">
+        <img class="controller-photo" src="assets/ns2-pro-front.jpg" width="1000" height="1000" alt="Nintendo Switch 2 Pro 手柄正面" draggable="false">
+  <div class="battery-row photo-battery">
+    <span id="batteryVoltage" class="battery-voltage" title="FD2 电压遥测">电压未知</span>
+    <div id="batteryIcon" class="battery-icon" role="img" aria-label="电量未知" title="电量未知">
+      <span class="battery-cell"></span><span class="battery-cell"></span><span class="battery-cell"></span><span class="battery-cell"></span><span class="battery-cell"></span><span class="battery-cell"></span><span class="battery-cell"></span>
+      <span id="chargeState" class="charge-state" role="img" aria-label="充电状态未知" title="充电状态未知">?</span>
+    </div>
+    <span id="batteryLevel" class="sr-only">电量未知</span><span id="batteryMeta" hidden></span>
+  </div>
+        <svg class="photo-leaders" viewBox="0 0 1000 1000" aria-hidden="true">
+          <g class="photo-leader-lines"><path d="M220 202 L200 135 H170 V112"/><path d="M780 202 L800 135 H830 V112"/><path d="M257 673 L207 858 L125 912"/><path d="M743 673 L793 858 L875 912"/><circle cx="220" cy="202" r="5"/><circle cx="780" cy="202" r="5"/><circle cx="257" cy="673" r="5"/><circle cx="743" cy="673" r="5"/></g>
+        </svg>
+        <svg class="stick-highlights" viewBox="0 0 1000 1000" aria-hidden="true">
+          <g transform="translate(239 382)"><circle id="leftOuterRing" class="outer-ring" r="76"/><circle id="leftInnerRing" class="inner-ring" r="7.6"/><path class="crosshair" d="M-16 0 H16 M0 -16 V16"/></g>
+          <g transform="translate(615 520)"><circle id="rightOuterRing" class="outer-ring" r="72"/><circle id="rightInnerRing" class="inner-ring" r="7.2"/><path class="crosshair" d="M-16 0 H16 M0 -16 V16"/></g>
+        </svg>
+        <button type="button" class="controller-key photo-callout" style="--x:125;--y:925;--w:160;--h:54" data-map-source="19" aria-label="GL 左背键映射" disabled>GL · 左背键</button>
+        <button type="button" class="controller-key photo-callout" style="--x:875;--y:925;--w:160;--h:54" data-map-source="18" aria-label="GR 右背键映射" disabled>GR · 右背键</button>
+      </div>
+    </div>
+  </div>
+  <div class="deadzone-toolbar">
+    <div class="map-actions"><button id="deadzoneRead" disabled>读取死区</button><button id="deadzoneSave" disabled>保存死区</button><label id="xboxLayoutControl" class="xbox-layout-control" hidden><input id="xboxLayoutToggle" type="checkbox" role="switch" aria-describedby="xboxLayoutState" disabled><span>使用任天堂布局</span><small id="xboxLayoutState" role="status" aria-live="polite">连接后读取</small></label><button id="deadzoneDefaults" class="quiet" disabled>恢复默认</button></div>
+    <p id="deadzoneState" role="status" aria-live="polite">连接支持死区功能的固件后可调节。</p><p id="deadzoneSavedState" role="status" aria-live="polite"></p>
+  </div>
+  <div class="mapping-editor"><div><span class="field-caption">当前选择</span><label for="mapTarget" id="mapSourceLabel">选择图中的按键</label></div><select id="mapTarget" aria-label="映射到 DualSense 按键" disabled></select></div>
+  <div class="paddle-heading"><h3>背键绑定</h3><span>GL / GR</span></div>
+  <div class="paddle-grid"><div class="paddle-control"><div id="leftPaddleButton"></div><select id="mapLeftPaddle" aria-label="左背键映射" disabled></select></div><div class="paddle-control"><div id="rightPaddleButton"></div><select id="mapRightPaddle" aria-label="右背键映射" disabled></select></div></div>
+  <div class="map-actions"><button id="mapApply" class="primary" disabled>应用映射</button><button id="mapSave" disabled>保存到设备</button><button id="mapRead" disabled>读取</button><button id="mapDefaults" class="quiet" disabled>恢复默认草稿</button></div>
+  <div class="status-stack"><p id="mapState" role="status" aria-live="polite">连接后读取设备映射</p><p id="mapSavedState" role="status" aria-live="polite"></p></div>
+  <details class="mapping-details"><summary>全部映射与操作说明</summary><p class="note">点击图中按键，选择 DualSense 输出目标。选择会修改草稿，应用后即时生效，保存后断电保留。背键也可用下拉菜单直接绑定。</p><table><thead><tr><th>实体按键</th><th>输出目标</th></tr></thead><tbody id="mapRows"></tbody></table><p class="note">手柄组合键仍可修改同一份映射，使用后点击“读取”同步。多个按键可以绑定同一目标；摇杆移动与陀螺仪不在此映射范围。</p></details>
+</section>
+<section class="card gyro-card" id="gyroPanel" aria-labelledby="gyroTitle">
+  <div class="card-heading calibration-heading"><h2 id="gyroTitle">陀螺仪校准</h2><span id="gyroBadge">未连接</span></div>
+  <p id="gyroState" role="status" aria-live="polite">将手柄平放在稳定桌面，松开所有按键后开始校准。</p>
+  <div class="calibration-progress" id="gyroProgressRow" hidden><label>静置采样 <progress id="gyroProgress" max="100" value="0"></progress><output id="gyroProgressText">0%</output></label></div>
+  <div class="map-actions"><button id="gyroBegin" disabled>开始校准</button><button id="gyroCancel" class="quiet" disabled>取消</button></div>
+  <p class="note">保持静止约 2 秒；检测到移动会重新计时。完成后自动保存到接收器，校验成功后生效；断电重启自动加载。</p>
+</section>
+<section class="card automation-card" id="turboPanel" aria-labelledby="turboTitle">
+  <div class="card-heading"><h2 id="turboTitle">按键连发</h2><span class="eyebrow">TURBO</span></div>
+  <p class="note">由接收器执行，关闭网页也可使用。应用后松开按键，再按下触发。</p>
+  <p class="note">选择需要连发的实体按键，可同时选择多个。</p>
+  <div id="turboButtons" class="automation-buttons" role="group" aria-label="连发按键"></div>
+  <div class="automation-fields">
+    <label for="turboMode">触发方式<select id="turboMode"><option value="hold">按住连发，松开停止</option><option value="toggle">按一下开启，再按一下停止</option></select></label>
+    <label for="turboRate">连发速度 <output id="turboRateValue">10 次/秒</output><input id="turboRate" type="range" min="1" max="30" value="10"></label>
+  </div>
+  <div class="map-actions"><button id="turboSave" type="button">保存连发草稿</button><button id="turboClear" class="quiet" type="button">清空选择</button></div>
+  <div class="map-actions"><button id="automationApply" type="button" class="primary" disabled>应用全部</button><button id="automationSave" type="button" disabled>保存到设备</button><button id="automationRead" type="button" disabled>读取设备</button><button id="automationStop" type="button" class="quiet" disabled>停止全部</button></div>
+  <p id="turboDraftState" class="automation-state" role="status" aria-live="polite">未连接 · 可编辑本地草稿，连接后读取或应用。</p>
+</section>
+<section class="card automation-card" id="macroPanel" aria-labelledby="macroTitle">
+  <div class="card-heading"><h2 id="macroTitle">宏</h2><span class="eyebrow">MACRO</span></div>
+  <p class="note">按顺序执行按键与等待，每次按键后松开 10 ms。触发键不透传到游戏；执行期间宏控制步骤涉及的按键。不同宏请使用不同触发键。</p>
+  <div class="automation-fields">
+    <label for="macroSlot">宏槽位<select id="macroSlot"><option value="0">宏 1</option><option value="1">宏 2</option><option value="2">宏 3</option><option value="3">宏 4</option></select></label>
+    <label for="macroName">名称<input id="macroName" type="text" maxlength="32" placeholder="例如：快速连招"></label>
+    <label for="macroTrigger">触发按键<select id="macroTrigger"></select></label>
+    <label for="macroMode">执行方式<select id="macroMode"><option value="once">按下执行一次</option><option value="hold">按住循环，松开停止</option><option value="toggle">按一下循环，再按一下停止</option></select></label>
+  </div>
+  <ol id="macroSteps" class="macro-steps" aria-label="宏步骤"></ol>
+  <div class="map-actions"><button id="macroAddButton" type="button">＋ 按键步骤</button><button id="macroAddWait" type="button">＋ 等待</button></div>
+  <p id="macroSummary" class="note"></p>
+  <div class="map-actions"><button id="macroSave" type="button">保存宏草稿</button><button id="macroClear" class="quiet" type="button">清空当前宏</button></div>
+  <div class="map-actions"><button id="macroDeviceApply" type="button" class="primary" disabled>应用全部</button><button id="macroDeviceSave" type="button" disabled>保存到设备</button><button id="macroDeviceRead" type="button" disabled>读取设备</button><button id="macroDeviceStop" type="button" class="quiet" disabled>停止全部</button></div>
+  <p class="note">上述设备操作同时处理连发和 4 个宏。连发按键、触发键及宏步骤均使用实体按键名称，输出跟随按键映射。</p>
+  <p id="macroDraftState" class="automation-state" role="status" aria-live="polite">未连接 · 可编辑本地草稿，连接后读取或应用。</p>
+</section>
+</div>
+<div class="right-column">
+  <section class="card calibration-card" aria-labelledby="calibrationTitle">
+    <div class="card-heading calibration-heading"><h2 id="calibrationTitle">摇杆校准</h2><span id="calibrationBadge">未连接</span></div>
+    <p id="calibrationState" role="status" aria-live="polite">连接后可采集中心与外圈，保存后作为默认基准。</p>
+    <div class="calibration-progress" id="calibrationProgress" hidden><label>静止中心 <progress id="calibrationCenter" max="100" value="0"></progress><output id="calibrationCenterText">—</output></label><label>左摇杆外圈 <progress id="calibrationLeft" max="32" value="0"></progress><output id="calibrationLeftText">—</output></label><label>右摇杆外圈 <progress id="calibrationRight" max="32" value="0"></progress><output id="calibrationRightText">—</output></label></div>
+    <div class="map-actions"><button id="calibrationBegin" disabled>开始校准</button><button id="calibrationFinish" disabled>完成采样</button><button id="calibrationSave" class="primary" disabled>保存并作为默认</button><button id="calibrationCancel" class="quiet" disabled>取消</button></div>
+    <p class="note">先松开两根摇杆保持静止；进入外圈采样后，两根摇杆分别贴住外沿缓慢转 3–5 圈。按提示补齐方向，再保存。换手柄后请重新校准。</p>
+  </section>
+<section class="card vibration-card" aria-labelledby="vibrationTitle">
+  <div class="card-heading"><h2 id="vibrationTitle">震动调节</h2><span class="eyebrow">HAPTICS</span></div>
+  <div id="settings">
+    <div class="slider-group master"><label for="gain">总强度 <output id="gainLabel">—</output></label><input id="gain" type="range" min="0" max="100" step="1" aria-describedby="gainNote" disabled><div class="scale"><span>0%</span><span>100%</span></div></div>
+    <div id="sources">
+      <div class="slider-group"><div class="ordinary-heading"><label for="ordinary">普通震动</label><label class="ordinary-algorithm-control" for="ordinaryAlgorithmToggle"><input id="ordinaryAlgorithmToggle" type="checkbox" role="switch" aria-describedby="ordinaryAlgorithmState" disabled><span>线性优化</span></label><select id="ordinaryProfile" aria-label="普通震动游戏档位" disabled><option id="ordinaryReferenceOption" value="5" hidden disabled>默认（仿枪械触觉反馈）</option><option id="ordinaryCustomOption" value="3" hidden disabled>自定义（传统转子）</option></select><output id="ordinaryLabel">—</output></div><input id="ordinary" type="range" min="0" max="100" step="1" aria-describedby="ordinaryHelp" disabled><p class="slider-help" id="ordinaryHelp">传统手柄的震动，比如碰撞、爆炸。</p><p class="slider-help" id="ordinaryAlgorithmState" role="status" aria-live="polite">连接后读取算法</p></div>
+      <details id="referenceTuningPanel" class="xbox-custom-panel" hidden open>
+        <summary>仿枪械触觉反馈参数 · 枪械／载具</summary>
+        <p class="slider-help">按已体验的手感设为默认：连射更像一下一下的冲击，不是一整团常震；手枪、步枪到机关枪仍能感到力度差别。单发保留撞击和逐渐回落，摩托车刹车反馈也比较合适。普通震动建议50%，兼顾长时间开枪；霰弹枪会稍轻一些。</p>
+        <label class="custom-range" for="referenceImpact"><span>冲击强度</span><output id="referenceImpactLabel">100%</output><input id="referenceImpact" type="range" min="0" max="200" step="1" value="100" disabled><small class="custom-help">主要管开枪那一下的撞击感和随后的回落。越大越有爆发力；不负责连射时一直托着的底劲。0%关闭这一段，默认100%。</small></label>
+        <label class="custom-range" for="referenceBody"><span>主体厚度</span><output id="referenceBodyLabel">100%</output><input id="referenceBody" type="range" min="0" max="200" step="1" value="100" disabled><small class="custom-help">管持续震动的底劲。调高更厚、更有支撑；调低更轻。它不是每发子弹的分隔感，默认100%。</small></label>
+        <label class="custom-range" for="referenceTexture"><span>瞬态纹理</span><output id="referenceTextureLabel">100%</output><input id="referenceTexture" type="range" min="0" max="200" step="1" value="100" disabled><small class="custom-help">给撞击和短尾声加一点细碎的质感。更像改变震动的“味道”，不是单纯加大力度；单发较容易比较，连射的分明程度主要看下面两项。0%关闭，默认100%。</small></label>
+        <label class="custom-range" for="referencePeriod"><span>持续纹理·节奏间隔</span><output id="referencePeriodLabel">100ms</output><input id="referencePeriod" type="range" min="60" max="210" step="10" value="100" disabled><small class="custom-help">管连射时“一下一下”隔多远。越小越密，越大越疏；默认100ms。它按本地节奏补细节，不是识别游戏中每颗子弹的真实时间。</small></label>
+        <label class="custom-range" for="referenceDepth"><span>持续纹理·起伏深度</span><output id="referenceDepthLabel">70%</output><input id="referenceDepth" type="range" min="0" max="100" step="10" value="70" disabled><small class="custom-help">管每一下从底劲里凸出来多少。实测约70%时连射已经比较分明，因此设为默认；再高会更猛烈，长时间开枪也更容易累。0%关闭颗粒起伏，保留主体震动。</small></label>
+        <div class="map-actions"><button id="referenceTuningRead" disabled>读取参数</button><button id="referenceTuningSave" disabled>保存参数</button><button id="referenceTuningDefaults" class="quiet" disabled>恢复参数默认</button></div>
+        <p class="slider-help">默认：冲击100%、主体100%、瞬态纹理100%、间隔100ms、深度70%。松开滑块即应用，保存后断电保留。叠加普通震动和总强度；达到输出上限后不再变强。仅作用于默认档位。DS5、Xbox、DS5 Edge共用这组参数，各模式独立选择算法；不改动HD音频。</p>
+        <p class="slider-help">这套效果优先照顾枪械和载具，不识别动作类型：跳跃也可能有颗粒感。此次2077测试中换弹没有额外震动，但不代表所有游戏都一样。左右马达力度也可能不同，实测连射时左侧更明显。</p>
+        <p id="referenceTuningState" class="slider-help" role="status" aria-live="polite"></p>
+      </details>
+      <details id="xboxCustomPanel" class="xbox-custom-panel" hidden>
+        <summary>自定义（传统转子）参数</summary>
+        <p class="slider-help">选择“自定义（传统转子）”后生效，无需扳机。默认参数保持原始输出；曲线小于 1 提升弱震，大于 1 拉开反差。时间按 12ms 调节。</p>
+        <div id="xboxCustomFields"></div>
+        <label class="custom-bypass"><input id="xboxCustomBypass" type="checkbox" role="switch" disabled><span>原始对照（暂时旁路）</span></label>
+        <div class="map-actions"><button id="xboxCustomRead" disabled>读取参数</button><button id="xboxCustomSave" disabled>保存参数</button><button id="xboxCustomDefaults" class="quiet" disabled>恢复参数默认</button></div>
+        <p id="xboxCustomState" class="slider-help" role="status" aria-live="polite">选择“自定义（传统转子）”后调节。</p>
+        <p class="slider-help">松开滑块即应用；保存参数后断电保留。本组参数在DS5、Xbox、DS5 Edge之间共用，暂不随下方预设切换。现有普通强度和总强度仍会叠加。</p>
+      </details>
+      <div class="slider-group"><label for="hd">HD 音频 <output id="hdLabel">—</output></label><input id="hd" type="range" min="0" max="100" step="1" aria-describedby="hdHelp" disabled><p class="slider-help" id="hdHelp">游戏传来的原生细腻触感，比如脚步、路面。DS5和DS5 Edge收到有效HD音频时优先使用它，不叠加上面的普通震动算法。</p></div>
+      <div class="slider-group"><label for="trigger">扳机反馈 <output id="triggerLabel">—</output></label><input id="trigger" type="range" min="0" max="100" step="1" aria-describedby="triggerHelp" disabled><p class="slider-help" id="triggerHelp">把游戏的扳机效果转成震动，比如开枪、拉弓。</p></div>
+    </div>
+    <div id="runtimePanel" class="trigger-panel"><label class="switch-label" for="triggerToggle"><span>自适应混合扳机震动<small id="triggerState" role="status">尚未读取</small></span><input id="triggerToggle" type="checkbox" role="switch" disabled></label><button id="runtimeRead" class="quiet small" disabled>刷新状态</button></div>
+    <div class="map-actions"><button id="saveGain" class="primary" disabled>保存到设备</button><button id="readGain" disabled>读取</button><button id="resetGain" disabled>恢复默认</button></div>
+    <div class="status-stack"><p id="gainState" role="status" aria-live="polite">连接后读取震动参数</p><p id="saveState" role="status" aria-live="polite"></p></div>
+    <p id="gainNote" class="note footer-note">松开滑块即生效，保存后断电保留。50% 为当前默认强度，100% 为两倍增益；各项再叠加总强度，输出到上限后不再增加。恢复默认后可点击保存。</p>
+  </div>
+</section>
+</div>
+<section class="card browser-settings-card" aria-labelledby="browserSettingsTitle">
+  <div class="card-heading"><h2 id="browserSettingsTitle">设置</h2><span class="eyebrow">APPLICATION</span></div>
+  <div class="browser-setting-row"><div><label for="browserAutostart">开机自启</label><p id="browserAutostartDescription">需要软件版。网页端不支持开机自启和后台自动连接。</p></div><input id="browserAutostart" type="checkbox" role="switch" aria-describedby="browserAutostartDescription" disabled></div>
+  <p class="note">安装并运行软件版后，可在“设置 → 开机自启”中开启。登录 Windows 后软件会在托盘启动，并自动连接接收器。</p>
+</section>
+</main>
+<template id="presetCardTemplate">
+<div class="preset-column">
+<section class="card preset-card" aria-labelledby="presetTitle">
+  <div class="card-heading"><h2 id="presetTitle">自定义预设</h2><span class="eyebrow">PRESETS</span></div>
+  <label for="presetList">当前固件的预设</label><select id="presetList" aria-label="当前固件的预设"></select>
+  <label for="presetName">预设名称</label><input id="presetName" type="text" maxlength="40" placeholder="例如：动作游戏" autocomplete="off">
+  <div class="map-actions"><button id="presetCreate" class="primary">保存为新预设</button><button id="presetOverwrite">覆盖所选预设</button></div>
+  <div class="map-actions"><button id="presetApply" class="primary">应用预设</button><button id="presetPersist">应用并保存到设备</button></div>
+  <div class="map-actions"><button id="presetRename" class="quiet">重命名</button><button id="presetDelete" class="quiet">删除</button><button id="presetUndo" class="quiet" hidden>撤销删除</button></div>
+  <p id="presetSummary" class="note"></p><p id="presetState" role="status" aria-live="polite"></p>
+  <p class="note">连接或切换模式时保留设备当前参数；选中预设后，点击“应用”才会恢复。</p>
+  <p class="note">DS5、Xbox、DS5 Edge 和原生 Pro2 的浏览器预设分别保存，同名也互不影响。旧公共预设会分别保留一份，之后各自编辑。</p>
+  <p class="note">包含全部震动强度、各模式线性优化开关和算法、算法细项、任天堂布局、映射、死区、摇杆模式、扳机开关，以及蓝牙超频开关和档位。摇杆校准独立保存，不进预设。</p>
+  <p class="note">保存时读取设备已生效参数，未应用的草稿不包含在内。浏览器预设留在当前浏览器；“应用并保存到设备”用于断电保留。</p>
+</section>
+<section class="card preset-card" aria-labelledby="controllerPresetTitle">
+  <div class="card-heading"><h2 id="controllerPresetTitle">手柄指示灯预设</h2><span class="eyebrow">1 · 2 · 3 · 4</span></div>
+  <p class="note">每个固件模式各有独立的 4 个灯位，共 16 个。这里显示当前模式的 4 个；四个指示灯从左到右对应预设 1–4。</p>
+  <label for="controllerPreset0">灯位 1</label><select id="controllerPreset0" aria-label="灯位 1 关联的预设"></select>
+  <div class="map-actions"><button id="controllerPresetSave0">保存灯位 1 关联</button><span id="controllerPresetSaved0" class="note"></span></div>
+  <label for="controllerPreset1">灯位 2</label><select id="controllerPreset1" aria-label="灯位 2 关联的预设"></select>
+  <div class="map-actions"><button id="controllerPresetSave1">保存灯位 2 关联</button><span id="controllerPresetSaved1" class="note"></span></div>
+  <label for="controllerPreset2">灯位 3</label><select id="controllerPreset2" aria-label="灯位 3 关联的预设"></select>
+  <div class="map-actions"><button id="controllerPresetSave2">保存灯位 3 关联</button><span id="controllerPresetSaved2" class="note"></span></div>
+  <label for="controllerPreset3">灯位 4</label><select id="controllerPreset3" aria-label="灯位 4 关联的预设"></select>
+  <div class="map-actions"><button id="controllerPresetSave3">保存灯位 4 关联</button><span id="controllerPresetSaved3" class="note"></span></div>
+  <p id="controllerPresetActive" role="status"></p><p id="controllerPresetState" role="status" aria-live="polite">连接接收器后读取关联。</p>
+  <p class="note">按住 HOME 约 0.7 秒后，按左/右切换到上一个/下一个已关联预设；循环跳过空灯位，每次按键切换一次，成功后点亮对应单灯。松开方向键即可再次切换。</p>
+  <p class="note">关联会把完整参数副本保存到当前模式的灯位。覆盖浏览器预设后需重新关联。HOME＋左/右只切换当前模式的四个灯位；切换固件不会自动套用首个灯位。蓝牙断连时先记住预设档位，连接后再请求协商，实际回报率以实测为准。</p>
+</section>
+</div>
+</template>
+<dialog id="firmwareDialog" aria-labelledby="firmwareTitle">
+  <div class="flash-heading"><div><span class="eyebrow">FIRMWARE UPDATE</span><h2 id="firmwareTitle">固件更新</h2></div><button id="firmwareClose" type="button" class="quiet">返回控制台</button></div>
+  <p class="flash-intro">连接接收器的 USB 串口，选择固件后更新。配对、校准与个人设置会保留。</p>
+  <div class="flash-step"><label for="firmwareFile">1 · 选择应用固件</label><input id="firmwareFile" type="file" accept=".bin"><p id="firmwareFileInfo" role="status">选择本项目的 ESP32-S3 应用 .bin 文件。</p></div>
+  <div class="flash-step"><span>2 · 连接烧录串口</span><div class="map-actions"><button id="flashConnect" type="button">连接烧录串口</button><button id="flashDisconnect" type="button" class="quiet" disabled>重启并断开</button></div><p id="flashPortInfo">选择 USB 串口设备（当前接收器为 FTDI）。连接后会进入更新模式。</p></div>
+  <div class="flash-step"><div class="flash-progress-heading"><span>3 · 更新固件</span><output id="flashPercent">0%</output></div><progress id="flashProgress" value="0" max="100" aria-label="固件写入进度"></progress><p id="flashStatus" role="status" aria-live="polite">尚未开始</p><button id="flashStart" type="button" class="primary" disabled>开始烧录</button></div>
+  <p class="note">使用桌面 Chrome / Edge 打开本页。更新时保持 USB 连接；关闭其他占用串口的软件。写入完成后还会校验，提示成功前不要拔线。</p>
+  <details class="flash-details"><summary>烧录日志</summary><pre id="flashLog" aria-label="烧录日志"></pre></details>
+</dialog>
+<pre id="log" hidden aria-label="通信日志"></pre>
+<script>
+'use strict';
+const button = document.querySelector('#test');
+const result = document.querySelector('#result');
+const log = document.querySelector('#log');
+const settings = document.querySelector('#settings');
+const gain = document.querySelector('#gain');
+const gainLabel = document.querySelector('#gainLabel');
+const gainState = document.querySelector('#gainState');
+const readGain = document.querySelector('#readGain');
+const saveGain = document.querySelector('#saveGain');
+const resetGain = document.querySelector('#resetGain');
+let gainScale = 1;
+const gainDisplay = value => value / gainScale;
+const saveState = document.querySelector('#saveState');
+let selectedDevice;
+let confirmedGain;
+let canSave = false;
+let canProfile = false;
+let confirmedProfile = [100, 100, 100, 100];
+const sourcePanel = document.querySelector('#sources');
+const ranges = [gain, ...['ordinary', 'hd', 'trigger'].map(id => document.querySelector('#' + id))];
+const labels = [gainLabel, ...['ordinaryLabel', 'hdLabel', 'triggerLabel'].map(id => document.querySelector('#' + id))];
+const profileText = values => typeof usbModeProfileText === 'function' ? usbModeProfileText(values) : canProfile
+  ? `总 ${gainDisplay(values[0])}% / 普通 ${gainDisplay(values[1])}% / HD ${gainDisplay(values[2])}% / 扳机 ${gainDisplay(values[3])}%`
+  : `${gainDisplay(values[0])}%`;
+let configBusy = false;
+let firmwarePanelOpen = false;
+function busy(value) {
+  value = value || firmwarePanelOpen || (typeof usbModeIsSwitching === 'function' && usbModeIsSwitching());
+  configBusy = value;
+  document.querySelector("#firmwareOpen").disabled = value;
+  button.disabled = value;
+  gain.disabled = value || !selectedDevice;
+  resetGain.disabled = value || !selectedDevice;
+  readGain.disabled = value || !selectedDevice;
+  saveGain.disabled = value || !selectedDevice || !canSave;
+  ranges.forEach(range => { range.disabled = value || !selectedDevice; });
+  if (typeof mappingBusy === 'function') mappingBusy(value);
+  if (typeof runtimeBusy === 'function') runtimeBusy(value);
+  if (typeof bleIntervalBusy === 'function') bleIntervalBusy(value);
+  if (typeof ordinaryAlgorithmBusy === 'function') ordinaryAlgorithmBusy(value);
+  if (typeof xboxLayoutBusy === 'function') xboxLayoutBusy(value);
+  if (typeof referenceTuningBusy === 'function') referenceTuningBusy(value);
+  if (typeof xboxCustomBusy === 'function') xboxCustomBusy(value);
+  if (typeof deadzoneBusy === 'function') deadzoneBusy(value);
+  if (typeof calibrationBusy === 'function') calibrationBusy(value);
+  if (typeof gyroBusy === 'function') gyroBusy(value);
+  if (typeof automationBusy === 'function') automationBusy(value);
+  if (typeof presetBusy === 'function') presetBusy(value);
+  if (typeof controllerPresetBusy === 'function') controllerPresetBusy(value);
+  if (typeof usbModeBusy === 'function') usbModeBusy(value);
+}
+function showGain(values) {
+  confirmedProfile = values.slice();
+  confirmedGain = values[0];
+  ranges.forEach((range, i) => { range.value = gainDisplay(values[i]); labels[i].textContent = `${gainDisplay(values[i])}%`; });
+  gainState.textContent = `当前设备回读：${profileText(values)}`;
+}
+async function fetchGain(device) {
+  const id = canProfile ? 5 : 3;
+  const config = payloadOf(await device.receiveFeatureReport(id), id);
+  const end = canProfile ? 5 : 2;
+  if (config[0] !== 1 || config.slice(1, end).some(v => v > 100 * gainScale) || config.slice(end).some(v => v !== 0)) {
+    throw new Error('总震动强度配置格式不符合预期');
+  }
+  return canProfile ? Array.from(config.slice(1, 5)) : [config[1], 100, 100, 100];
+}
+async function fetchSave(device) {
+  const id = canProfile ? 6 : 4;
+  const status = payloadOf(await device.receiveFeatureReport(id), id);
+  if (status[0] !== 1 || status[1] > 3 || status[2] > 100 * gainScale ||
+      status[3] > 1 || (status[3] && status[4] > 100 * gainScale) ||
+      (canProfile && status.slice(10, 16).some(v => v > 100 * gainScale))) {
+    throw new Error('保存状态格式不符合预期');
+  }
+  return status;
+}
+function showSaved(status) {
+  const saved = [status[4], ...(canProfile ? Array.from(status.slice(10, 13)) : [100, 100, 100])];
+  const matches = saved.every((value, i) => value === confirmedProfile[i]);
+  if (status[1] === 1) saveState.textContent = '设备正在保存…';
+  else if (status[1] === 3) {
+    const error = new DataView(status.buffer, status.byteOffset, status.byteLength).getUint32(6, true);
+    saveState.textContent = `保存状态错误：0x${error.toString(16)}，保存值未确认`;
+  } else if (status[3]) {
+    saveState.textContent = matches
+      ? `已保存到设备：${profileText(saved)}，断电重启后恢复此值`
+      : `设备已保存 ${profileText(saved)}；当前 ${profileText(confirmedProfile)} 尚未保存`;
+  } else saveState.textContent = `当前 ${profileText(confirmedProfile)} 尚未保存；断电重启恢复默认 ${gainDisplay(100)}%`;
+}
+const line = text => { log.textContent += text + '\n'; };
+const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(' ');
+
+function payloadOf(view, id) {
+  if (view.byteLength !== 64 || view.getUint8(0) !== id) {
+    const raw = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
+    line(`收到原始数据 (${raw.length} 字节): ${hex(raw)}`);
+    throw new Error(`Report ${id} 格式错误，预期 1 字节 ID + 63 字节数据`);
+  }
+  return new Uint8Array(view.buffer, view.byteOffset + 1, 63);
+}
+
+button.addEventListener('click', async () => {
+  if (configBusy) return;
+  busy(true);
+  settings.hidden = false;
+  selectedDevice = undefined;
+  canSave = false;
+  canProfile = false;
+  sourcePanel.hidden = false;
+  if (typeof mappingReset === 'function') mappingReset();
+  if (typeof runtimeReset === 'function') runtimeReset();
+  if (typeof deadzoneReset === 'function') deadzoneReset();
+  if (typeof calibrationReset === 'function') calibrationReset();
+  if (typeof gyroReset === 'function') gyroReset();
+  if (typeof automationReset === 'function') automationReset();
+  saveGain.hidden = true;
+  saveState.textContent = '';
+  result.textContent = '等待选择设备…'; result.dataset.connected = 'false';
+  ranges.forEach((range, i) => { labels[i].textContent = '—'; });
+  gainState.textContent = '连接后读取震动参数';
+  log.textContent = '';
+  let device;
+  try {
+    if (!window.isSecureContext) throw new Error('请通过 http://localhost 或 HTTPS 打开本页');
+    if (!navigator.hid) throw new Error('当前浏览器未提供 WebHID，请在桌面 Chrome 或 Edge 中打开');
+    [device] = await navigator.hid.requestDevice({
+      filters: [
+        {vendorId: 0x054c, usagePage: 0xff00, usage: 0x01}, // DS5 / Edge config HID
+        {vendorId: 0x057e, usagePage: 0xff00, usage: 0x02}, // Native Pro2 config HID
+        {vendorId: 0xcafe, usagePage: 0xff00, usage: 0x01}, // Xbox config HID
+      ],
+    });
+    if (!device) {
+      result.textContent = '未连接';
+      line('没有选择设备。如果列表为空，请检查 USB 数据连接，并重新插拔接收器。');
+      return;
+    }
+    line(`设备: ${device.productName}`);
+    line(`VID:PID ${device.vendorId.toString(16).padStart(4, '0')}:${device.productId.toString(16).padStart(4, '0')}`);
+    await device.open();
+    result.textContent = '正在连接…';
+    const info = payloadOf(await device.receiveFeatureReport(1), 1);
+    if (new TextDecoder().decode(info.slice(0, 4)) !== 'NSCF' ||
+        info[4] !== 1 || info[5] !== 63 || info[6] !== 1 || !(info[7] & 1)) {
+      line(`接口信息: ${hex(info)}`);
+      throw new Error('配置接口标识、版本或能力不符合预期');
+    }
+    fullSettingsSupported = Boolean(info[42] & 4);
+    line('接口信息通过: NSCF / 协议 v1 / payload 63 字节');
+    line(`固件版本: ${new TextDecoder().decode(info.slice(8, 40)).split('\0')[0]}`);
+    for (let round = 1; round <= 10; round++) {
+      const sent = crypto.getRandomValues(new Uint8Array(63));
+      // Include the report ID in the first payload position in one round to
+      // catch accidental double-stripping of Report IDs.
+      if (round === 1) sent[0] = 2;
+      await device.sendFeatureReport(2, sent);
+      const received = payloadOf(await device.receiveFeatureReport(2), 2);
+      if (!sent.every((value, i) => received[i] === value)) {
+        line(`发送: ${hex(sent)}`);
+        line(`回读: ${hex(received)}`);
+        throw new Error(`第 ${round} 轮回读数据不一致`);
+      }
+      line(`第 ${round}/10 轮: 63 字节逐字节比对通过`);
+    }
+    line(`完成时间: ${new Date().toLocaleString()}`);
+    line('通信比对通过；实际震动手感需在游戏中单独验证。');
+    if (info[7] & 2) {
+      gainScale = (info[40] & 2) ? 2 : 1;
+      ranges.forEach(r => { r.step = gainScale === 2 ? 0.5 : 1; });
+      canProfile = Boolean(info[7] & 8);
+      if (typeof usbModeConnected === 'function') await usbModeConnected(device, info[40]);
+      if (typeof ordinaryAlgorithmConnected === 'function') await ordinaryAlgorithmConnected(device, info[40], info[41], info[42]);
+      if (typeof xboxLayoutConnected === 'function') await xboxLayoutConnected(device, info[41]);
+      if (typeof referenceTuningConnected === 'function') await referenceTuningConnected(device, info[41]);
+      if (typeof xboxCustomConnected === 'function') await xboxCustomConnected(device, info[41]);
+      showGain(await fetchGain(device));
+      canSave = Boolean(info[7] & 4);
+      if (canSave) showSaved(await fetchSave(device));
+      else saveState.textContent = `当前固件仅支持 RAM 调节，重启恢复 ${gainDisplay(100)}%`;
+      saveGain.hidden = !canSave;
+      selectedDevice = device;
+      settings.hidden = false;
+      sourcePanel.hidden = !canProfile;
+      line('已读取总震动强度。松开滑块后实时应用，并回读确认。');
+      if (typeof mappingConnected === 'function') await mappingConnected(device, info[7]);
+      if (typeof deadzoneConnected === 'function') await deadzoneConnected(device, info[7], info[40]);
+      if (typeof calibrationConnected === 'function') await calibrationConnected(device, info[7]);
+      if (typeof gyroConnected === 'function') await gyroConnected(device, info[42]);
+      if (typeof automationConnected === 'function') await automationConnected(device, info[42]);
+      if (typeof runtimeConnected === 'function') await runtimeConnected(device, info[7], info[40]);
+    } else {
+      line('当前固件仅支持通信测试；烧录支持总强度的新固件后可显示滑块。');
+    }
+    result.textContent = '连接成功'; result.dataset.connected = 'true';
+    presetSelectMode(usbModeConfirmed);
+    if (typeof controllerPresetConnected === 'function') await controllerPresetConnected(device, info[40]);
+    if (typeof presetRestoreConnected === 'function') await presetRestoreConnected(device);
+  } catch (error) {
+    result.textContent = `连接失败：${error.message}`; result.dataset.connected = 'false';
+    line(`${error.name}: ${error.message}`);
+    line('请保留以上错误信息。如果提示设备占用，请关闭其他配置页或 HID 调试工具后重试。');
+  } finally {
+    if (device?.opened) {
+      try { await device.close(); }
+      catch (error) { line(`关闭设备: ${error.message}`); }
+    }
+    busy(false);
+  }
+});
+
+ranges.forEach((range, i) => range.addEventListener('input', () => { labels[i].textContent = `${range.value}%`; }));
+async function configureGain(write) {
+  if (!selectedDevice) return;
+  const device = selectedDevice;
+  const target = ranges.map((range, i) => typeof usbModeGainEditable === 'function' && !usbModeGainEditable(i)
+    ? confirmedProfile[i] : Math.round(Number(range.value) * gainScale));
+  busy(true);
+  gainState.textContent = write ? '正在应用并回读…' : '正在读取…';
+  try {
+    await device.open();
+    if (write) {
+      const payload = new Uint8Array(63);
+      payload[0] = 1;
+      payload.set(canProfile ? target : [target[0]], 1);
+      await device.sendFeatureReport(canProfile ? 5 : 3, payload);
+    }
+    const actual = await fetchGain(device);
+    showGain(actual);
+    if (!write && typeof ordinaryAlgorithmRefresh === 'function') await ordinaryAlgorithmRefresh(device);
+    if (!write && typeof xboxLayoutRefresh === 'function') await xboxLayoutRefresh(device);
+    if (!write && typeof xboxCustomRefresh === 'function') await xboxCustomRefresh(device);
+    if (canSave) showSaved(await fetchSave(device));
+    if (write && actual.some((value, i) => value !== target[i])) throw new Error('设备回读与目标配置不一致');
+    line(`${new Date().toLocaleTimeString()} 震动配置回读: ${profileText(actual)}`);
+  } catch (error) {
+    if (confirmedGain !== undefined) {
+      ranges.forEach((range, i) => { range.value = gainDisplay(confirmedProfile[i]); labels[i].textContent = `${gainDisplay(confirmedProfile[i])}%`; });
+    }
+    gainState.textContent = `未确认当前设备值：${error.message}。请重新读取或连接。`;
+    line(`${error.name}: ${error.message}`);
+  } finally {
+    if (device.opened) {
+      try { await device.close(); }
+      catch (error) { line(`关闭设备: ${error.message}`); }
+    }
+    busy(false);
+  }
+}
+ranges.forEach(range => range.addEventListener('change', () => configureGain(true)));
+readGain.addEventListener('click', () => configureGain(false));
+resetGain.addEventListener('click', () => {
+  if (!selectedDevice || configBusy) return;
+  ranges.forEach((r, i) => { if (typeof usbModeGainEditable !== 'function' || usbModeGainEditable(i)) r.value = gainDisplay(100); });
+  configureGain(true);
+});
+saveGain.addEventListener('click', async () => {
+  if (!selectedDevice || !canSave) return;
+  const device = selectedDevice;
+  busy(true);
+  saveState.textContent = '正在保存到设备…';
+  try {
+    await device.open();
+    const target = await fetchGain(device);
+    showGain(target);
+    const token = crypto.getRandomValues(new Uint8Array(1))[0];
+    const request = new Uint8Array(63);
+    request.set([1, 1, target[0], token]);
+    if (canProfile) request.set(target.slice(1), 4);
+    await device.sendFeatureReport(canProfile ? 6 : 4, request);
+    let complete = false;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const status = await fetchSave(device);
+      if (status[5] !== token || status[2] !== target[0] ||
+          (canProfile && target.slice(1).some((value, i) => status[13 + i] !== value)))
+        throw new Error('保存请求未被接受，设备可能正在处理其他请求');
+      showSaved(status);
+      if (status[1] === 3) throw new Error(saveState.textContent);
+      if (status[1] === 2 && status[3] && status[4] === target[0] &&
+          (!canProfile || target.slice(1).every((value, i) => status[10 + i] === value))) {
+        complete = true;
+        line(`${new Date().toLocaleTimeString()} NVS 保存并读回确认：${profileText(target)}`);
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    if (!complete) throw new Error('保存超时，请点击“读取当前值”重新查询保存状态');
+  } catch (error) {
+    saveState.textContent = `保存未确认：${error.message}`;
+    line(`${error.name}: ${error.message}`);
+  } finally {
+    if (device.opened) {
+      try { await device.close(); }
+      catch (error) { line(`关闭设备: ${error.message}`); }
+    }
+    busy(false);
+  }
+});
+navigator.hid?.addEventListener('disconnect', event => {
+  if (event.device === selectedDevice) {
+    if (typeof usbModeDisconnected === 'function') usbModeDisconnected();
+    if (typeof xboxLayoutReset === 'function') xboxLayoutReset();
+    if (typeof referenceTuningReset === 'function') referenceTuningReset();
+    if (typeof xboxCustomReset === 'function') xboxCustomReset();
+    if (typeof mappingReset === 'function') mappingReset();
+    if (typeof runtimeReset === 'function') runtimeReset();
+  if (typeof deadzoneReset === 'function') deadzoneReset();
+  if (typeof calibrationReset === 'function') calibrationReset();
+  if (typeof gyroReset === 'function') gyroReset();
+  if (typeof automationReset === 'function') automationReset();
+    selectedDevice = undefined;
+    busy(false);
+    ranges.forEach((range, i) => { labels[i].textContent = '—'; });
+    gainState.textContent = '连接后读取震动参数'; saveState.textContent = '';
+    settings.hidden = false;
+    result.textContent = '接收器已断开'; result.dataset.connected = 'false';
+  }
+});
+</script>
+<script src="mapping.js"></script>
+<script src="automation.js"></script>
+<script src="automation-device.js"></script>
+<script src="controller-view.js"></script>
+<script src="stick-calibration.js"></script>
+<script src="runtime.js"></script>
+<script src="usb-mode.js"></script>
+<script src="gyro-calibration.js"></script>
+<script src="ble-interval.js"></script>
+<script src="ordinary-algorithm.js"></script>
+<script src="xbox-reference-config.js"></script>
+<script src="xbox-layout.js"></script>
+<script src="xbox-custom.js"></script>
+<script src="presets.js"></script>
+<script src="controller-presets.js"></script>
+<script src="desktop-app.js"></script>
+<script src="vendor/js-md5-0.8.3/md5.js"></script>
+<script type="module" src="firmware-update.js"></script>
+</body>
+</html>

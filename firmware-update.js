@@ -1,15 +1,20 @@
 import { inspectFirmware, APP_OFFSET } from './firmware-image.mjs';
 import { resetToApplication } from './firmware-reset.mjs';
+import { bundledCatalog, bundledImage } from './bundled-firmware.mjs';
 const el = id => document.getElementById(id);
 const dialog = el('firmwareDialog'), open = el('firmwareOpen'), close = el('firmwareClose');
 const file = el('firmwareFile'), info = el('firmwareFileInfo'), connect = el('flashConnect');
 const disconnect = el('flashDisconnect'), start = el('flashStart'), state = el('flashStatus');
 const progress = el('flashProgress'), percent = el('flashPercent'), portInfo = el('flashPortInfo');
 const log = el('flashLog');
+const bundledSelect=el('bundledFirmwareSelect'), bundledUse=el('bundledFirmwareUse'), bundledState=el('bundledFirmwareState');
+let bundledItems=[];
 let firmware, port, transport, loader, working = false, verified = false;
 const append = value => { log.textContent = (log.textContent + String(value) + '\n').slice(-24000); log.scrollTop = log.scrollHeight; };
 function controls() {
   close.disabled = working; file.disabled = working;
+  if(bundledSelect)bundledSelect.disabled=working||!bundledItems.length;
+  if(bundledUse)bundledUse.disabled=working||!bundledItems.length;
   connect.disabled = working || Boolean(loader) || !navigator.serial || !window.isSecureContext;
   disconnect.disabled = working || !transport;
   start.disabled = working || !loader || !firmware;
@@ -29,6 +34,31 @@ open.addEventListener('click', () => {
   firmwarePanelOpen = true; busy(true); dialog.showModal();
   if (!navigator.serial || !window.isSecureContext) state.textContent = '此浏览器未提供 Web Serial，请在桌面 Chrome / Edge 的 localhost 或 HTTPS 页面打开。';
   controls();
+  if(bundledSelect&&!bundledItems.length)void loadBundledList();
+});
+async function loadBundledList(){
+  if(working)return;
+  working=true;controls();bundledState.textContent='正在读取随包固件…';
+  try{
+    bundledItems=await bundledCatalog();
+    bundledSelect.replaceChildren();
+    for(const item of bundledItems){const option=document.createElement('option');option.value=item.id;option.textContent=`${item.name} · ${item.version}`;bundledSelect.append(option);}
+    bundledState.textContent='选择后点击“使用此固件”，也可在下方选择本地文件。';
+  }catch(e){bundledState.textContent=`${e.message}；可以选择本地 .bin 文件。`;}
+  finally{working=false;controls();}
+}
+bundledUse?.addEventListener('click',async()=>{
+  if(working)return;
+  const item=bundledItems.find(item=>item.id===bundledSelect.value);if(!item)return;
+  firmware=undefined;working=true;controls();setProgress(0);file.value='';
+  info.textContent='正在校验随包固件…';info.title='';
+  try{
+    firmware=await bundledImage(item);
+    info.textContent=`随包固件：${item.name} · ${firmware.version} · ${(firmware.size/1024).toFixed(1)} KB`;
+    info.title=`SHA-256: ${firmware.sha256}`;
+    state.textContent=loader?'随包固件校验通过，准备就绪，点击开始烧录。':'随包固件校验通过，请连接烧录串口。';
+  }catch(e){info.textContent=`随包固件不可用：${e.message}`;state.textContent='请选择有效固件。';}
+  finally{working=false;controls();}
 });
 async function closePanel() {
   if (working) return;
@@ -96,7 +126,7 @@ start.addEventListener('click', async () => {
     if (!verified) throw new Error('未收到固件写入校验成功结果');
     setProgress(100);
     const released = await release();
-    state.textContent = released ? '烧录及校验成功，已发送启动复位信号。返回控制台后重新连接，确认接收器已启动。' : '烧录及校验成功，但启动未确认；请手动重启接收器。';
+    state.textContent = released ? '烧录及校验成功。请拔掉 COM/USB 串口线，给接收器断电重启，再返回控制台确认连接。' : '烧录及校验成功，但启动未确认。请拔掉 COM/USB 串口线，给接收器断电重启。';
   } catch (e) {
     state.textContent = `更新未确认：${e.message}。可重新连接串口重试。`; append(state.textContent);
     await release();

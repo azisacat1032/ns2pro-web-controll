@@ -5,6 +5,7 @@
     presets: ['presetTitle', 'controllerPresetTitle'],
     automation: ['turboTitle', 'macroTitle']
   };
+  if (document.querySelector('#appSettingsTitle, #browserSettingsTitle')) sections.appsettings = ['appSettingsTitle', 'browserSettingsTitle'];
   const links = [...document.querySelectorAll('[data-app-view]')];
   const cards = [...document.querySelectorAll('.dashboard .card')];
   function showView() {

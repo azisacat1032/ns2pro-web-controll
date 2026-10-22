@@ -1,4 +1,9 @@
 /* Desktop shell. Existing controls and device behavior remain in their modules. */
+.browser-settings-nav{margin-top:auto;padding:18px 0}.browser-settings-nav+.app-sidebar-footer{margin-top:0}
+.dashboard .browser-settings-card{grid-column:1/-1;width:100%;max-width:920px;box-sizing:border-box;justify-self:center}
+.browser-setting-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:8px 0 24px;border-bottom:1px solid #ffffff0c}
+.browser-setting-row label{font-size:15px;font-weight:650;color:#edf2f8}.browser-setting-row p{font-size:13px;color:var(--muted);margin:8px 0 0;line-height:1.7}.browser-setting-row input{flex-shrink:0}
+html:has(script[src="native-bridge.js"]) .browser-settings-nav,html:has(script[src="native-bridge.js"]) .browser-settings-card{display:none!important}
 :root{background:#14171c;--muted:#9da6b4;--blue:#58c5e9}
 html{scrollbar-gutter:stable}
 body{margin:0;padding:0 32px 32px 252px;background:radial-gradient(ellipse at 80% 0,#20313e55,transparent 55%),#14171c;min-height:100vh;box-sizing:border-box}

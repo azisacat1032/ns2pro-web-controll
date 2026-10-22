@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "nativeApi": 1,
+  "revision": "e048f402163f53db7c072f601b96deb0dc8d5f8adfb3805dd12921e86c64ff31",
+  "files": [
+    {
+      "path": "assets/ns2-pro-front.jpg",
+      "bytes": 126659,
+      "sha256": "e5bb4fbd64ec6c76dcb2679506d4641174d131b8362b9b256254a6ab8af5ac8d"
+    },
+    {
+      "path": "automation-device.js",
+      "bytes": 11266,
+      "sha256": "e1a2212a827054b693d246afd6edeb88601aab738a437963d242560c6c31ccd8"
+    },
+    {
+      "path": "automation.js",
+      "bytes": 8483,
+      "sha256": "42258c054133607024fbbb8366df0c7ea98f4d42de85b58291d63d2a29889773"
+    },
+    {
+      "path": "ble-interval.js",
+      "bytes": 8393,
+      "sha256": "090ae797d19cea44d8b3f09ca6c57eb30515ce92c9273f5dd9b3b30ac66c63a9"
+    },
+    {
+      "path": "bundled-firmware.mjs",
+      "bytes": 1697,
+      "sha256": "a5648cb799f08d9a176173dd6b9b9eccfba4db641cd737a060b513af593a909f"
+    },
+    {
+      "path": "controller-presets.js",
+      "bytes": 6954,
+      "sha256": "cd4b6bc2d30c024b9140e33f3a98375c2ff330e8b1d34436baf2f3da44fee537"
+    },
+    {
+      "path": "controller-view.js",
+      "bytes": 8545,
+      "sha256": "17d65ceb69200be50bcd810efcdd41b6ad8ee098c2893196495ac65f7aeb94a2"
+    },
+    {
+      "path": "desktop-app.css",
+      "bytes": 5334,
+      "sha256": "d93d1d4350647032f135eab75171969ee9bd20919bbfc6190521cf1a579944fe"
+    },
+    {
+      "path": "desktop-app.js",
+      "bytes": 1236,
+      "sha256": "fc435cd8d682c9d34fe528dc1fedc7d13a2872956a13d58703843242dbf50370"
+    },
+    {
+      "path": "firmware-image.mjs",
+      "bytes": 1995,
+      "sha256": "84ff83fb2509ef9aa23de02c8a41a48819a0400fbe3c926e7810f396b8b414f3"
+    },
+    {
+      "path": "firmware-reset.mjs",
+      "bytes": 519,
+      "sha256": "e593b7df7f4cbc784b25d72bad1e41cf4311ed3c99f90df6b2cbaebeaba82757"
+    },
+    {
+      "path": "firmware-update.js",
+      "bytes": 8366,
+      "sha256": "fdf13168336149ee4be9b0e26f732925af5ce0699e2478fd40d952dbf881b2aa"
+    },
+    {
+      "path": "firmware/NS2Pro-ESP32S3-Four-Modes.bin",
+      "bytes": 799280,
+      "sha256": "f09e66064106b57d3803134d9bcc0450488f4be3bd310445064ddae925365788"
+    },
+    {
+      "path": "firmware/SHA256SUMS.txt",
+      "bytes": 96,
+      "sha256": "65e583e012d00ebab527025cd6622c605043e08f06bfb8c712f6c85d97f9d62a"
+    },
+    {
+      "path": "firmware/catalog.json",
+      "bytes": 462,
+      "sha256": "e3540667180b4230065635405eb8711a5deb356103ed33f51c97de6e49802d5e"
+    },
+    {
+      "path": "gyro-calibration.js",
+      "bytes": 4695,
+      "sha256": "8dcd97a092d9bbf8063c784198cd19f398326dcf76b0c1ea21a95c59037453ff"
+    },
+    {
+      "path": "index.html",
+      "bytes": 47387,
+      "sha256": "8300dacc32761d5930a5610732abe1b399faf8ea1976242b415ed229b130918d"
+    },
+    {
+      "path": "mapping.js",
+      "bytes": 11862,
+      "sha256": "3752e87e0b4b3d0fa9371785186150e4e0ead330d2bfbda2094b3acf9c1224fb"
+    },
+    {
+      "path": "ordinary-algorithm.js",
+      "bytes": 9310,
+      "sha256": "82b41b9bc3a14bb31256af073d04a34cc69facf7b265d6b14f6407f7014d1564"
+    },
+    {
+      "path": "presets.js",
+      "bytes": 19402,
+      "sha256": "84d363701aa4f868fcc3e388866003822e242183c07e3a645cebe06c8362ba0a"
+    },
+    {
+      "path": "runtime.js",
+      "bytes": 9912,
+      "sha256": "acedb83646be155508414a77955b40ee46a58057b0c66f120ab4f386f0719e68"
+    },
+    {
+      "path": "stick-calibration.js",
+      "bytes": 6721,
+      "sha256": "fd094dc9437dc4bfd2739921b50e60f5af648c04532875a9871376598f1592d2"
+    },
+    {
+      "path": "style.css",
+      "bytes": 27794,
+      "sha256": "76d63acb89502300c37020279f2cbe4546e765479975c7b05e41341579f4d9c0"
+    },
+    {
+      "path": "usb-mode.js",
+      "bytes": 4399,
+      "sha256": "72be252737e40ca20f68a36e97d9b62c789ba09b77fa7e008dff7ad7984f6bda"
+    },
+    {
+      "path": "vendor/README.md",
+      "bytes": 832,
+      "sha256": "a7c280fe6d99a6182b2f3c57e9501aa1c0a4698edda3ad958bf487912b19817c"
+    },
+    {
+      "path": "vendor/esptool-js-0.7.0/LICENSE",
+      "bytes": 11566,
+      "sha256": "3fa6adb1a93fb956d5fca578c9b7cade461015042f223536b2d69cbed67d4874"
+    },
+    {
+      "path": "vendor/esptool-js-0.7.0/bundle.js",
+      "bytes": 313171,
+      "sha256": "00ebe6fb0b202976d3e2a3c6b9a6bd438c26a81d2af6739c95ac276a64c1a84e"
+    },
+    {
+      "path": "vendor/js-md5-0.8.3/LICENSE.txt",
+      "bytes": 1059,
+      "sha256": "ac52bd3e7b6e3155c416a6d875c5738fa2c315015fca5a70b21b6863662abd67"
+    },
+    {
+      "path": "vendor/js-md5-0.8.3/md5.js",
+      "bytes": 29468,
+      "sha256": "e2d6d6818e2d63adc7c7e7aa13e445cd2c65da05f313ea6c9f54ee4e35733f0f"
+    },
+    {
+      "path": "xbox-custom.js",
+      "bytes": 14764,
+      "sha256": "898dce0b783a3d12157d82c96ca977d5fb2522c479f18d1b07e7b39e3eb2418c"
+    },
+    {
+      "path": "xbox-layout.js",
+      "bytes": 3239,
+      "sha256": "ffed3193b6b840596371a1215dda0740b90c7ebe15ccf817dacd5b5c4a5df103"
+    },
+    {
+      "path": "xbox-reference-config.js",
+      "bytes": 7537,
+      "sha256": "32a081b707074c0c82687558eb06835e929a8a3798bcf1b933b841d5c71e60bd"
+    }
+  ]
+}

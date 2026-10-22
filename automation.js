@@ -1,5 +1,5 @@
 'use strict';
-// Browser-only drafts. No HID commands are sent until firmware support is added.
+// Editor drafts are separate from the receiver configuration and NVS saves.
 (() => {
   const $ = id => document.getElementById(id);
   const storageKey = 'ns2pro.automation-drafts.v1';
@@ -18,23 +18,24 @@
         modes.includes(m.mode) && Array.isArray(m.steps) && m.steps.length <= 32 && m.steps.every(s => s &&
           ['button', 'wait'].includes(s.type) && integer(s.duration, 10, 10000) && (s.type === 'wait' || integer(s.button, 0, 20))));
   }
-  let draft = fresh(), slot = 0;
+  let draft = fresh(), slot = 0, hasDraft = false;
   try {
     const stored = localStorage.getItem(storageKey);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (!valid(parsed)) throw Error('invalid draft');
       draft = parsed;
+      hasDraft = true;
     }
   } catch (_) {
-    for (const id of ['turboDraftState', 'macroDraftState']) $(id).textContent = '无法读取本地草稿，已显示默认值；尚未接入固件。';
+    for (const id of ['turboDraftState', 'macroDraftState']) $(id).textContent = '无法读取本地草稿，已显示默认值。连接后可读取设备配置。';
   }
-  const dirty = id => { $(id).textContent = '草稿已修改，尚未保存到浏览器；尚未接入固件。'; };
+  const dirty = id => { hasDraft = true; $(id).textContent = '草稿已修改，点击“应用全部”下发；“保存到设备”可断电保留。'; };
   function save(id) {
     if (!valid(draft)) { $(id).textContent = '请检查配置：步骤时长须为 10–10000 ms 的整数。'; return; }
     try {
       localStorage.setItem(storageKey, JSON.stringify(draft));
-      $(id).textContent = '草稿已保存到当前浏览器；尚未接入固件，手柄不会执行。';
+      hasDraft = true; $(id).textContent = '全部草稿已保存到当前浏览器。设备配置需单独应用或保存。';
     } catch (_) { $(id).textContent = '保存失败，浏览器存储不可用；请保留当前页面。'; }
   }
   function options(select, blank) {
@@ -71,7 +72,7 @@
   options($('macroTrigger'), true);
   const summary = () => {
     const steps = draft.macros[slot].steps;
-    $('macroSummary').textContent = `${steps.length} / 32 步 · 单轮 ${steps.reduce((sum, s) => sum + (Number.isFinite(s.duration) ? s.duration : 0), 0)} ms`;
+    $('macroSummary').textContent = `${steps.length} / 32 步 · 单轮 ${steps.reduce((sum, s) => sum + (Number.isFinite(s.duration) ? s.duration : 0) + (s.type === 'button' ? 10 : 0), 0)} ms（每次按键后松开 10 ms）`;
     $('macroAddButton').disabled = $('macroAddWait').disabled = steps.length >= 32;
   };
   function renderSteps() {
@@ -126,5 +127,17 @@
   }
   $('macroClear').addEventListener('click', () => { draft.macros[slot] = emptyMacro(); renderMacro(); dirty('macroDraftState'); });
   $('macroSave').addEventListener('click', () => save('macroDraftState'));
+  globalThis.automationEditor = {
+    get: () => structuredClone(draft),
+    valid,
+    hasDraft: () => hasDraft,
+    set(value) {
+      if (!valid(value)) throw Error('连发/宏配置格式无效');
+      draft = structuredClone(value); hasDraft = false;
+      $('turboMode').value = draft.turbo.mode; $('turboRate').value = draft.turbo.rate; rateLabel();
+      Array.from($('turboButtons').children).forEach((button, i) => button.setAttribute('aria-pressed', String(draft.turbo.buttons.includes(i))));
+      renderMacro();
+    }
+  };
   renderMacro();
 })();
